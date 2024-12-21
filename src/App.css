@@ -1,12 +1,166 @@
 .App {
   text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background-color: #F0F4F7;  /* Snow background */
+  padding: 2rem;
+}
+
+.content-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 16px rgba(20,107,58,0.2);
+  border: 2px solid #146B3A;
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .App-header {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  position: relative;
+}
+
+.christmas-button {
+  background-color: #BB2528;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Playfair Display', Georgia, serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.75rem 1.5rem;
+}
+
+.christmas-button:hover {
+  background-color: #F8B229;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(20,107,58,0.15);
+}
+
+/* Snow effect */
+.snow-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.snowflake {
+  color: #146B3A;
+  font-size: 2em;
+  font-family: Arial, sans-serif;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+  position: fixed;
+  top: -10%;
+  z-index: 0;
+  user-select: none;
+  cursor: default;
+  animation-name: snowflakes-fall, snowflakes-shake;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-play-state: running, running;
+  opacity: 0.8;
+}
+
+@keyframes snowflakes-fall {
+  0% {
+    top: -10%;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+@keyframes snowflakes-shake {
+  0% {
+    transform: translateX(-50px);
+  }
+  25% {
+    transform: translateX(50px);
+  }
+  50% {
+    transform: translateX(-25px);
+  }
+  75% {
+    transform: translateX(75px);
+  }
+  100% {
+    transform: translateX(-50px);
+  }
+}
+
+/* Random positions and animations for snowflakes */
+.snowflake:nth-of-type(1) { 
+  left: 7%; 
+  animation-duration: 8s, 4s; 
+  animation-delay: 1s, 0s; 
+  font-size: 1.5em; 
+}
+.snowflake:nth-of-type(2) { 
+  left: 23%; 
+  animation-duration: 12s, 5s; 
+  animation-delay: 0s, 1s; 
+  font-size: 2em; 
+}
+.snowflake:nth-of-type(3) { 
+  left: 35%; 
+  animation-duration: 9s, 3s; 
+  animation-delay: 2s, 1.5s; 
+  font-size: 1.8em; 
+}
+.snowflake:nth-of-type(4) { 
+  left: 42%; 
+  animation-duration: 11s, 4.5s; 
+  animation-delay: 0s, 2s; 
+  font-size: 1.6em; 
+}
+.snowflake:nth-of-type(5) { 
+  left: 58%; 
+  animation-duration: 10s, 3.5s; 
+  animation-delay: 1.5s, 0.5s; 
+  font-size: 2.2em; 
+}
+.snowflake:nth-of-type(6) { 
+  left: 64%; 
+  animation-duration: 7s, 4.8s; 
+  animation-delay: 0.5s, 1s; 
+  font-size: 1.7em; 
+}
+.snowflake:nth-of-type(7) { 
+  left: 78%; 
+  animation-duration: 13s, 3.2s; 
+  animation-delay: 2s, 0s; 
+  font-size: 1.9em; 
+}
+.snowflake:nth-of-type(8) { 
+  left: 85%; 
+  animation-duration: 8.5s, 4.2s; 
+  animation-delay: 1s, 2s; 
+  font-size: 2.1em; 
+}
+.snowflake:nth-of-type(9) { 
+  left: 92%; 
+  animation-duration: 11.5s, 3.8s; 
+  animation-delay: 0s, 1.5s; 
+  font-size: 1.4em; 
+}
+.snowflake:nth-of-type(10) { 
+  left: 15%; 
+  animation-duration: 9.5s, 4.4s; 
+  animation-delay: 1.5s, 0.5s; 
+  font-size: 2em; 
 }
