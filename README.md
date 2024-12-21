@@ -7,8 +7,8 @@ A modern web application for creating and solving crossword puzzles.
 This project was bootstrapped with Create React App and uses TypeScript.
 
 ### Prerequisites
-- Node.js
-- npm or yarn
+- Node.js (v14 or higher)
+- npm (v6 or higher) or yarn
 - Git
 
 ### Installation
@@ -21,3 +21,4 @@ This project was bootstrapped with Create React App and uses TypeScript.
 - Solve puzzles
 - Modern React-based interface
 - TypeScript for type safety
+- Responsive design
