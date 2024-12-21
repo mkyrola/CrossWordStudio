@@ -5,10 +5,12 @@
   box-sizing: border-box;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&display=swap');
+
 body {
-  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
-  background-color: #ECF0F1;
-  color: #2C3E50;
+  font-family: 'Playfair Display', Georgia, serif;
+  background-color: #F0F4F7;
+  color: #2F4F4F;
   line-height: 1.6;
 }
 
@@ -16,54 +18,69 @@ body {
 h1, h2, h3, h4, h5, h6 {
   margin-bottom: 1rem;
   font-weight: 700;
+  color: #146B3A;  /* Christmas green */
 }
 
-h1 { font-size: 2rem; }
-h2 { font-size: 1.75rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1.25rem; }
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
 
 /* Links */
 a {
-  color: #3498DB;
+  color: #BB2528;  /* Christmas red */
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 a:hover {
-  color: #2980B9;
+  color: #F8B229;  /* Gold */
 }
 
 /* Buttons */
 button {
-  background-color: #3498DB;
+  background-color: #BB2528;  /* Christmas red */
   color: white;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  font-family: 'Playfair Display', Georgia, serif;
 }
 
 button:hover {
-  background-color: #2980B9;
+  background-color: #F8B229;  /* Gold */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(20,107,58,0.15);
 }
 
 button:disabled {
-  background-color: #BDC3C7;
+  background-color: #6B8E23;  /* Olive green */
   cursor: not-allowed;
 }
 
 /* Form elements */
 input, textarea {
   padding: 0.5rem;
-  border: 1px solid #BDC3C7;
+  border: 2px solid #146B3A;  /* Christmas green */
   border-radius: 4px;
   font-size: 1rem;
-  transition: border-color 0.2s ease;
+  font-family: 'Playfair Display', Georgia, serif;
+  transition: all 0.2s ease;
 }
 
 input:focus, textarea:focus {
   outline: none;
-  border-color: #3498DB;
+  border-color: #F8B229;  /* Gold */
+  box-shadow: 0 0 0 3px rgba(248,178,41,0.2);  /* Gold shadow */
+}
+
+/* Custom Christmas styles */
+.christmas-card {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 8px 16px rgba(20,107,58,0.2);
+  border: 2px solid #146B3A;
 }
