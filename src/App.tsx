@@ -1,62 +1,54 @@
 import React from 'react';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import ImageUpload from './components/ImageUpload';
+import Studio from './pages/Studio';
 import { theme } from './styles/theme';
 
-function App() {
-  // Create more snowflakes with different characters
-  const snowflakes = Array(20).fill('').map(() => {
-    const flakes = ['❅', '❆', '❄'];
-    return flakes[Math.floor(Math.random() * flakes.length)];
-  });
+const App: React.FC = () => {
+  const handleImageUpload = (file: File) => {
+    // Handle the file upload
+    console.log('File uploaded:', file.name);
+  };
 
   return (
-    <div className="App">
-      {/* Snow effect */}
-      <div className="snow-container">
-        {snowflakes.map((flake, index) => (
-          <div 
-            key={index} 
-            className="snowflake"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDuration: `${8 + Math.random() * 6}s, ${3 + Math.random() * 2}s`,
-              animationDelay: `${Math.random() * 4}s, ${Math.random() * 2}s`,
-              fontSize: `${1.2 + Math.random()}em`
-            }}
-          >
-            {flake}
-          </div>
-        ))}
+    <Router>
+      <div className="App">
+        <div className="snow-container">
+          {[...Array(10)].map((_, i) => (
+            <div key={i} className="snowflake">❅</div>
+          ))}
+        </div>
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              <div className="content-card">
+                <header className="App-header">
+                  <h1 style={{ 
+                    fontSize: theme.typography.fontSize.xlarge,
+                    fontFamily: theme.typography.fontFamily,
+                    color: theme.colors.primary,
+                    marginBottom: theme.spacing.md
+                  }}>
+                    Arto's CrossWord Studio
+                  </h1>
+                  <p style={{
+                    fontSize: theme.typography.fontSize.medium,
+                    color: theme.colors.text.secondary,
+                    marginBottom: theme.spacing.xl
+                  }}>
+                    Create festive crossword puzzles for your Christmas cards!
+                  </p>
+                  <ImageUpload onImageUpload={handleImageUpload} />
+                </header>
+              </div>
+            } 
+          />
+          <Route path="/studio" element={<Studio />} />
+        </Routes>
       </div>
-
-      <div className="content-card">
-        <header className="App-header">
-          <h1 style={{ 
-            fontSize: theme.typography.fontSize.xlarge,
-            fontFamily: theme.typography.fontFamily,
-            color: theme.colors.primary
-          }}>
-            Arto's CrossWord Studio
-          </h1>
-          <p style={{
-            fontSize: theme.typography.fontSize.medium,
-            marginTop: theme.spacing.md,
-            color: theme.colors.text.secondary
-          }}>
-            Create festive crossword puzzles for your Christmas cards!
-          </p>
-          <button 
-            className="christmas-button"
-            style={{
-              marginTop: theme.spacing.lg
-            }}
-          >
-            Upload Puzzle Image
-          </button>
-        </header>
-      </div>
-    </div>
+    </Router>
   );
-}
+};
 
 export default App;
