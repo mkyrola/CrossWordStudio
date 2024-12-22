@@ -6,9 +6,9 @@ const theme = {
     background: '#F0F4F7', // Snow white
     surface: '#FFFFFF',    // Pure white
     text: {
-      primary: '#2F4F4F',  // Dark green-gray
-      secondary: '#146B3A', // Christmas green
-      inverse: '#146B3A'    // Christmas green
+      primary: '#2F4F4F',   // Dark slate gray for main text
+      secondary: '#666666', // Medium gray for secondary text
+      inverse: '#FFFFFF'    // White for text on dark backgrounds
     },
     border: '#146B3A',     // Christmas green
     success: '#146B3A',    // Christmas green
@@ -41,9 +41,9 @@ const theme = {
     large: '12px'
   },
   shadows: {
-    small: '0 2px 4px rgba(20,107,58,0.1)',   // Green shadows
-    medium: '0 4px 6px rgba(20,107,58,0.15)',  // Green shadows
-    large: '0 8px 16px rgba(20,107,58,0.2)'    // Green shadows
+    small: '0 2px 4px rgba(0,0,0,0.1)',   // Black shadows
+    medium: '0 4px 6px rgba(0,0,0,0.15)',  // Black shadows
+    large: '0 8px 16px rgba(0,0,0,0.2)'    // Black shadows
   },
   breakpoints: {
     mobile: '320px',

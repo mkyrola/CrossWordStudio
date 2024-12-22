@@ -18,14 +18,15 @@ const CustomNavLink: React.FC<{ to: string; children: React.ReactNode }> = ({ to
         marginRight: theme.spacing.lg,
         textDecoration: 'none',
         fontWeight: isActive ? theme.typography.fontWeight.bold : theme.typography.fontWeight.medium,
-        transition: 'opacity 0.2s ease',
-        opacity: isHovered ? 0.8 : 1,
-        background: 'none',
+        transition: 'all 0.2s ease',
+        opacity: isHovered ? 0.9 : 1,
+        background: isActive ? 'rgba(255,255,255,0.1)' : 'none',
         border: 'none',
-        padding: 0,
+        padding: theme.spacing.sm + ' ' + theme.spacing.md,
+        borderRadius: theme.borderRadius.small,
         cursor: 'pointer',
-        fontSize: 'inherit',
-        fontFamily: 'inherit'
+        fontSize: theme.typography.fontSize.medium,
+        fontFamily: theme.typography.fontFamily
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -39,9 +40,9 @@ const Navigation = () => {
   return (
     <nav style={{
       padding: theme.spacing.lg,
-      backgroundColor: theme.colors.secondary,
+      backgroundColor: theme.colors.primary,
       marginBottom: theme.spacing.lg,
-      boxShadow: '0 4px 6px rgba(187,37,40,0.15)'
+      boxShadow: theme.shadows.medium
     }}>
       <CustomNavLink to="/">Home</CustomNavLink>
       <CustomNavLink to="/creator">Creator</CustomNavLink>
