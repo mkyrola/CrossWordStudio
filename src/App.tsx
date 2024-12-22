@@ -1,76 +1,100 @@
-import React, { useState } from 'react';
-import ImageUpload from './components/ImageUpload';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import Studio from './pages/Studio';
 import theme from './styles/theme';
+import { Creator } from './pages/Creator';
+import { Solver } from './solver/pages/Solver';
+
+const CustomNavLink: React.FC<{ to: string; children: React.ReactNode }> = ({ to, children }) => {
+  const [isHovered, setIsHovered] = React.useState(false);
+  const navigate = useNavigate();
+  const isActive = window.location.pathname === to;
+  
+  return (
+    <button 
+      onClick={() => navigate(to)}
+      style={{
+        color: theme.colors.text.inverse,
+        marginRight: theme.spacing.lg,
+        textDecoration: 'none',
+        fontWeight: isActive ? theme.typography.fontWeight.bold : theme.typography.fontWeight.medium,
+        transition: 'opacity 0.2s ease',
+        opacity: isHovered ? 0.8 : 1,
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        cursor: 'pointer',
+        fontSize: 'inherit',
+        fontFamily: 'inherit'
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {children}
+    </button>
+  );
+};
+
+const Navigation = () => {
+  return (
+    <nav style={{
+      padding: theme.spacing.lg,
+      backgroundColor: theme.colors.secondary,
+      marginBottom: theme.spacing.lg,
+      boxShadow: '0 4px 6px rgba(187,37,40,0.15)'
+    }}>
+      <CustomNavLink to="/">Home</CustomNavLink>
+      <CustomNavLink to="/creator">Creator</CustomNavLink>
+      <CustomNavLink to="/solver">Solver</CustomNavLink>
+    </nav>
+  );
+};
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<'home' | 'studio'>('home');
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  
-  const handleImageUpload = (file: File) => {
-    try {
-      // Create an object URL for the uploaded file
-      const newImageUrl = URL.createObjectURL(file);
-      console.log('Created image URL:', newImageUrl);
-      setImageUrl(newImageUrl);
-    } catch (error) {
-      console.error('Error creating object URL:', error);
-    }
-  };
-
-  const handleNavigateToStudio = () => {
-    console.log('Navigating to studio...');
-    setCurrentPage('studio');
-  };
-
-  const handleNavigateToHome = () => {
-    console.log('Navigating to home...');
-    if (imageUrl) {
-      console.log('Revoking URL:', imageUrl);
-      URL.revokeObjectURL(imageUrl);
-      setImageUrl(null);
-    }
-    setCurrentPage('home');
-  };
-
   return (
-    <div className="App">
-      <div className="snow-container">
-        {[...Array(10)].map((_, i) => (
-          <div key={i} className="snowflake">❅</div>
-        ))}
+    <Router>
+      <div className="App" style={{ 
+        backgroundColor: theme.colors.background,
+        minHeight: '100vh',
+        fontFamily: theme.typography.fontFamily
+      }}>
+        <Routes>
+          <Route path="*" element={<>
+            <Navigation />
+            <div className="snow-container">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="snowflake">❅</div>
+              ))}
+            </div>
+            <Routes>
+              <Route path="/" element={
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: theme.spacing.xl,
+                  color: theme.colors.text.primary
+                }}>
+                  <h1 style={{ 
+                    fontSize: theme.typography.fontSize.xlarge,
+                    marginBottom: theme.spacing.lg,
+                    color: theme.colors.secondary
+                  }}>
+                    Welcome to CrossWord Studio
+                  </h1>
+                  <p style={{ 
+                    fontSize: theme.typography.fontSize.large,
+                    color: theme.colors.text.secondary
+                  }}>
+                    Choose Creator to make puzzles or Solver to solve them
+                  </p>
+                </div>
+              } />
+              <Route path="/creator" element={<Creator />} />
+              <Route path="/solver" element={<Solver />} />
+            </Routes>
+          </>} />
+        </Routes>
       </div>
-      {currentPage === 'home' ? (
-        <div className="content-card">
-          <header className="App-header">
-            <h1 style={{ 
-              fontSize: theme.typography.fontSize.xlarge,
-              fontFamily: theme.typography.fontFamily,
-              color: theme.colors.primary,
-              marginBottom: theme.spacing.md
-            }}>
-              Arto's CrossWord Studio
-            </h1>
-            <p style={{
-              fontSize: theme.typography.fontSize.medium,
-              color: theme.colors.text.secondary,
-              marginBottom: theme.spacing.xl
-            }}>
-              Create festive crossword puzzles for your Christmas cards!
-            </p>
-            <ImageUpload 
-              onImageUpload={handleImageUpload} 
-              onNavigate={handleNavigateToStudio}
-            />
-          </header>
-        </div>
-      ) : (
-        <Studio 
-          imageUrl={imageUrl} 
-          onNavigate={handleNavigateToHome} 
-        />
-      )}
-    </div>
+    </Router>
   );
 };
 
