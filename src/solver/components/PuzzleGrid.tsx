@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, KeyboardEvent } from 'react';
 import { GridCell, GridDimensions } from '../../common/types/grid';
 import { PuzzleWord } from '../../common/types/puzzle';
 
 interface PuzzleGridProps {
-  dimensions: GridDimensions;
+  dimensions: {
+    rows: number;
+    columns: number;
+  };
   words?: PuzzleWord[];
   onCellChange?: (row: number, col: number, value: string) => void;
 }
@@ -13,11 +16,10 @@ export const PuzzleGrid: React.FC<PuzzleGridProps> = ({ dimensions, words, onCel
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
   const [direction, setDirection] = useState<'across' | 'down'>('across');
 
-  // Initialize empty grid
   useEffect(() => {
-    const newGrid = Array(dimensions.rows).fill(null).map(() =>
+    const newGrid: GridCell[][] = Array(dimensions.rows).fill(null).map(() =>
       Array(dimensions.columns).fill(null).map(() => ({
-        value: '',
+        letter: '',
         isBlocked: false
       }))
     );
@@ -34,7 +36,7 @@ export const PuzzleGrid: React.FC<PuzzleGridProps> = ({ dimensions, words, onCel
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, row: number, col: number) => {
+  const handleKeyPress = (e: KeyboardEvent<HTMLDivElement>, row: number, col: number) => {
     if (grid[row][col].isBlocked) return;
 
     if (/^[a-zA-Z]$/.test(e.key)) {
@@ -42,7 +44,7 @@ export const PuzzleGrid: React.FC<PuzzleGridProps> = ({ dimensions, words, onCel
       const newGrid = [...grid];
       newGrid[row][col] = {
         ...newGrid[row][col],
-        value: e.key.toUpperCase()
+        letter: e.key.toUpperCase()
       };
       setGrid(newGrid);
       onCellChange?.(row, col, e.key.toUpperCase());
@@ -52,6 +54,15 @@ export const PuzzleGrid: React.FC<PuzzleGridProps> = ({ dimensions, words, onCel
       if (nextCell) {
         setSelectedCell(nextCell);
       }
+    } else if (e.key === 'Backspace' || e.key === 'Delete') {
+      e.preventDefault();
+      const newGrid = [...grid];
+      newGrid[row][col] = {
+        ...newGrid[row][col],
+        letter: ''
+      };
+      setGrid(newGrid);
+      onCellChange?.(row, col, '');
     }
   };
 
@@ -73,35 +84,31 @@ export const PuzzleGrid: React.FC<PuzzleGridProps> = ({ dimensions, words, onCel
       className="puzzle-grid"
       style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(${dimensions.columns}, ${dimensions.cellWidth}px)`,
-        gap: '1px',
-        backgroundColor: '#000',
-        padding: '1px',
+        gridTemplateColumns: `repeat(${dimensions.columns}, 40px)`,
+        gap: '2px',
+        padding: '10px'
       }}
     >
       {grid.map((row, rowIndex) => 
         row.map((cell, colIndex) => (
           <div
             key={`${rowIndex}-${colIndex}`}
-            style={{
-              width: dimensions.cellWidth,
-              height: dimensions.cellHeight,
-              backgroundColor: cell.isBlocked ? '#000' : '#fff',
-              border: selectedCell?.row === rowIndex && selectedCell?.col === colIndex
-                ? '2px solid #0066cc'
-                : '1px solid #ccc',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              fontSize: `${Math.min(dimensions.cellWidth, dimensions.cellHeight) * 0.6}px`,
-              cursor: cell.isBlocked ? 'default' : 'pointer',
-              position: 'relative'
-            }}
             onClick={() => handleCellClick(rowIndex, colIndex)}
-            onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
+            onKeyDown={(e) => handleKeyPress(e, rowIndex, colIndex)}
+            style={{
+              width: '40px',
+              height: '40px',
+              border: '1px solid #ccc',
+              backgroundColor: cell.isBlocked ? '#333' : '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: cell.isBlocked ? 'not-allowed' : 'text',
+              outline: selectedCell?.row === rowIndex && selectedCell?.col === colIndex ? '2px solid #007bff' : 'none'
+            }}
             tabIndex={cell.isBlocked ? -1 : 0}
           >
-            {cell.value}
+            {cell.letter}
           </div>
         ))
       )}

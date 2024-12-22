@@ -1,5 +1,5 @@
 import React from 'react';
-import { GridCell, GridDimensions, GridOffset } from '../../../common/types/grid';
+import { GridCell, GridDimensions, GridOffset } from '../../common/types/grid';
 
 interface GridExportProps {
   gridRef: React.RefObject<HTMLDivElement>;

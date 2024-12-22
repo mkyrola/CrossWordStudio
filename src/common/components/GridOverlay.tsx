@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import theme from '../../../styles/theme';
+import theme from '../../styles/theme';
 
 interface GridOverlayProps {
   gridWidth: number;
@@ -92,96 +92,35 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
       <svg
         width={imageWidth}
         height={imageHeight}
-        style={{
-          position: 'absolute',
-          top: offsetY,
-          left: offsetX,
-          zIndex: 2
-        }}
+        style={{ position: 'absolute', top: 0, left: 0 }}
       >
         {/* Draw grid lines */}
-        {Array(gridHeight + 1).fill(0).map((_, i) => (
-          <line
-            key={`h${i}`}
-            x1={0}
-            y1={i * cellHeight}
-            x2={gridWidth * cellWidth}
-            y2={i * cellHeight}
-            stroke="red"
-            strokeWidth="1"
-            opacity="1"
-          />
+        {grid.map((row, rowIndex) => (
+          row.map((cell, colIndex) => (
+            <g key={`cell-${rowIndex}-${colIndex}`}>
+              <rect
+                x={colIndex * cellWidth}
+                y={rowIndex * cellHeight}
+                width={cellWidth}
+                height={cellHeight}
+                fill={!cell.isEditable ? theme.colors.background : theme.colors.surface}
+                stroke={theme.colors.border}
+                strokeWidth="1"
+                onClick={() => toggleCellEditable(rowIndex, colIndex)}
+              />
+              {cell.letter !== ' ' && (
+                <text
+                  x={colIndex * cellWidth + 2}
+                  y={rowIndex * cellHeight + 8}
+                  fontSize="8"
+                  fill={theme.colors.text.secondary}
+                >
+                  {cell.letter}
+                </text>
+              )}
+            </g>
+          ))
         ))}
-        {Array(gridWidth + 1).fill(0).map((_, i) => (
-          <line
-            key={`v${i}`}
-            x1={i * cellWidth}
-            y1={0}
-            x2={i * cellWidth}
-            y2={gridHeight * cellHeight}
-            stroke="red"
-            strokeWidth="1"
-            opacity="1"
-          />
-        ))}
-
-        {/* Draw solution cells */}
-        {grid.map((row, y) => row.map((cell, x) => (
-          <g key={`${x}-${y}`}>
-            {/* Cell background - clickable */}
-            <rect
-              x={x * cellWidth}
-              y={y * cellHeight}
-              width={cellWidth}
-              height={cellHeight}
-              fill={!cell.isEditable ? '#f0f0f0' : 'transparent'}
-              fillOpacity={!cell.isEditable ? "0.9" : "0"}
-              stroke="none"
-              style={{ cursor: 'pointer' }}
-              onClick={() => toggleCellEditable(y, x)}
-            />
-
-            {/* Cross for space cells */}
-            {cell.letter === ' ' && (
-              <>
-                <line
-                  x1={x * cellWidth}
-                  y1={y * cellHeight}
-                  x2={(x + 1) * cellWidth}
-                  y2={(y + 1) * cellHeight}
-                  stroke="black"
-                  strokeWidth="1"
-                  opacity="0.8"
-                />
-                <line
-                  x1={(x + 1) * cellWidth}
-                  y1={y * cellHeight}
-                  x2={x * cellWidth}
-                  y2={(y + 1) * cellHeight}
-                  stroke="black"
-                  strokeWidth="1"
-                  opacity="0.8"
-                />
-              </>
-            )}
-
-            {/* Cell letter */}
-            {cell.letter !== ' ' && (
-              <text
-                x={x * cellWidth + cellWidth / 2}
-                y={y * cellHeight + cellHeight / 2}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fill="black"
-                fontSize={Math.min(cellWidth, cellHeight) * 0.6}
-                fontFamily="Arial"
-                style={{ userSelect: 'none' }}
-              >
-                {cell.letter}
-              </text>
-            )}
-          </g>
-        )))}
       </svg>
 
       {showSaveButton && (

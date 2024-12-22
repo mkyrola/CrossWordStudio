@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import Studio from './pages/Studio';
 import theme from './styles/theme';
-import { Creator } from './pages/Creator';
+import Creator from './pages/Creator';
 import { Solver } from './solver/pages/Solver';
 
 const CustomNavLink: React.FC<{ to: string; children: React.ReactNode }> = ({ to, children }) => {

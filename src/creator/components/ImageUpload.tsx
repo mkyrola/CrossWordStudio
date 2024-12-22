@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useRef } from 'react';
-import theme from '../../../styles/theme';
-import { validateImage } from '../../../utils/imageValidation';
+import theme from '../../styles/theme';
+import { validateImage } from '../../utils/imageValidation';
 
 interface ImageUploadProps {
   onImageUpload: (file: File) => void;
@@ -183,17 +183,20 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUpload, onNavigate }) 
         <button
           onClick={onNavigate}
           style={{
-            padding: '12px 24px',
+            padding: '8px 16px',
             backgroundColor: 'transparent',
-            color: theme.colors.text.secondary,
+            color: theme.colors.text.primary,
             border: `1px solid ${theme.colors.border}`,
             borderRadius: '4px',
             cursor: 'pointer',
             fontSize: '1rem',
-            transition: 'all 0.3s ease',
-            ':hover': {
-              backgroundColor: `${theme.colors.border}20`
-            }
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = `${theme.colors.border}20`;
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
           }}
         >
           Continue without image
