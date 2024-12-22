@@ -58,40 +58,46 @@ const App: React.FC = () => {
         minHeight: '100vh',
         fontFamily: theme.typography.fontFamily
       }}>
+        <Navigation />
+        <div className="snow-container">
+          {[...Array(10)].map((_, i) => (
+            <div key={i} className="snowflake">❅</div>
+          ))}
+        </div>
         <Routes>
-          <Route path="*" element={<>
-            <Navigation />
-            <div className="snow-container">
-              {[...Array(10)].map((_, i) => (
-                <div key={i} className="snowflake">❅</div>
-              ))}
+          <Route path="/" element={
+            <div style={{ 
+              textAlign: 'center', 
+              padding: theme.spacing.xl,
+              color: theme.colors.text.primary
+            }}>
+              <h1 style={{ 
+                fontSize: theme.typography.fontSize.xlarge,
+                marginBottom: theme.spacing.lg,
+                color: theme.colors.secondary
+              }}>
+                Welcome to CrossWord Studio
+              </h1>
+              <p style={{ 
+                fontSize: theme.typography.fontSize.large,
+                color: theme.colors.text.secondary
+              }}>
+                Choose Creator to make puzzles or Solver to solve them
+              </p>
             </div>
-            <Routes>
-              <Route path="/" element={
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: theme.spacing.xl,
-                  color: theme.colors.text.primary
-                }}>
-                  <h1 style={{ 
-                    fontSize: theme.typography.fontSize.xlarge,
-                    marginBottom: theme.spacing.lg,
-                    color: theme.colors.secondary
-                  }}>
-                    Welcome to CrossWord Studio
-                  </h1>
-                  <p style={{ 
-                    fontSize: theme.typography.fontSize.large,
-                    color: theme.colors.text.secondary
-                  }}>
-                    Choose Creator to make puzzles or Solver to solve them
-                  </p>
-                </div>
-              } />
-              <Route path="/creator" element={<Creator />} />
-              <Route path="/solver" element={<Solver />} />
-            </Routes>
-          </>} />
+          } />
+          <Route path="/creator" element={<Creator />} />
+          <Route path="/solver" element={<Solver />} />
+          <Route path="*" element={
+            <div style={{ 
+              textAlign: 'center', 
+              padding: theme.spacing.xl,
+              color: theme.colors.text.primary
+            }}>
+              <h1>404 - Page Not Found</h1>
+              <p>The page you're looking for doesn't exist.</p>
+            </div>
+          } />
         </Routes>
       </div>
     </Router>
