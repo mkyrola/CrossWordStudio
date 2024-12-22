@@ -78,6 +78,7 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
 
         // Only set initial cell sizes if they haven't been manually adjusted
         setCalibrationData(prev => ({
+
           ...prev,
           cellWidth: prev.cellWidth === 1 ? Math.floor(scaledWidth / prev.gridWidth) : prev.cellWidth,
           cellHeight: prev.cellHeight === 1 ? Math.floor(scaledHeight / prev.gridHeight) : prev.cellHeight,
@@ -222,255 +223,40 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
   }
 
   return (
-    <div className="App" style={{
-      backgroundColor: isDarkMode ? '#1a1a1a' : '#F0F4F7',
+    <div style={{
+      backgroundColor: isDarkMode ? '#1a1a1a' : theme.colors.background,
       minHeight: '100vh',
-      height: '100vh',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '0',
-      overflow: 'hidden'
+      position: 'relative',
+      transition: 'background-color 0.3s ease'
     }}>
-      <div style={{
-        position: 'relative',
-        width: '95%',
-        height: '90vh',
-        backgroundColor: isDarkMode ? '#1a1a1a' : theme.colors.secondary,
-        padding: '32px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-        border: '8px solid #BB2528',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden'
-      }}>
-        {/* Horizontal Ribbon */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '-24px',
-          right: '-24px',
-          height: '96px',
-          backgroundColor: theme.colors.accent,
-          transform: 'translateY(-50%)',
-          boxShadow: '0 4px 8px rgba(248,178,41,0.3)',
-          borderRadius: '8px',
-          zIndex: 1
-        }} />
-
-        {/* Vertical Ribbon */}
-        <div style={{
-          position: 'absolute',
-          left: '50%',
-          top: '-24px',
-          bottom: '-24px',
-          width: '96px',
-          backgroundColor: theme.colors.accent,
-          transform: 'translateX(-50%)',
-          boxShadow: '0 4px 8px rgba(248,178,41,0.3)',
-          borderRadius: '8px',
-          zIndex: 1
-        }} />
-
-        {/* Ribbon Bow */}
-        <div style={{
-          position: 'absolute',
-          top: '-40px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 6,
-          width: '180px',
-          height: '90px'
-        }}>
-          {/* Left loop */}
-          <div style={{
-            position: 'absolute',
-            left: '10px',
-            bottom: '15px',
-            width: '70px',
-            height: '45px',
-            background: theme.colors.accent,
-            borderRadius: '35px 35px 0 0',
-            transform: 'rotate(-35deg)',
-            transformOrigin: 'bottom right',
-            boxShadow: '-2px -2px 6px rgba(0,0,0,0.1)'
-          }} />
-
-          {/* Right loop */}
-          <div style={{
-            position: 'absolute',
-            right: '10px',
-            bottom: '15px',
-            width: '70px',
-            height: '45px',
-            background: theme.colors.accent,
-            borderRadius: '35px 35px 0 0',
-            transform: 'rotate(35deg)',
-            transformOrigin: 'bottom left',
-            boxShadow: '2px -2px 6px rgba(0,0,0,0.1)'
-          }} />
-
-          {/* Center knot */}
-          <div style={{
-            position: 'absolute',
-            left: '50%',
-            bottom: '10px',
-            width: '40px',
-            height: '25px',
-            background: theme.colors.accent,
-            transform: 'translateX(-50%)',
-            clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-            zIndex: 2
-          }} />
-
-          {/* Left tail */}
-          <div style={{
-            position: 'absolute',
-            left: '50%',
-            bottom: '-30px',
-            width: '25px',
-            height: '60px',
-            background: theme.colors.accent,
-            transform: 'translateX(-140%) rotate(15deg)',
-            transformOrigin: 'top center',
-            clipPath: 'polygon(0 0, 100% 0, 100% 100%, 20% 100%)',
-            boxShadow: '2px 2px 6px rgba(0,0,0,0.1)'
-          }} />
-
-          {/* Right tail */}
-          <div style={{
-            position: 'absolute',
-            left: '50%',
-            bottom: '-30px',
-            width: '25px',
-            height: '60px',
-            background: theme.colors.accent,
-            transform: 'translateX(40%) rotate(-15deg)',
-            transformOrigin: 'top center',
-            clipPath: 'polygon(0 0, 100% 0, 80% 100%, 0 100%)',
-            boxShadow: '-2px 2px 6px rgba(0,0,0,0.1)'
-          }} />
-        </div>
-
-        {/* White workspace with clipping mask */}
-        <div style={{
-          position: 'absolute',
-          top: '32px',
-          left: '32px',
-          right: '32px',
-          bottom: '32px',
-          backgroundColor: '#FFFFFF',
-          borderRadius: '16px',
-          zIndex: 2
-        }} />
-
-        {/* Content container */}
-        <div style={{
-          position: 'relative',
-          width: '100%',
-          height: 'calc(100vh - 200px)',
-          backgroundColor: isDarkMode ? '#1a1a1a' : theme.colors.surface,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          zIndex: 2,
-          padding: '32px'
-        }}>
-          <div style={{
-            position: 'relative',
-            height: '100%',
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <div className="grid-container" ref={gridRef} style={{
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative'
-            }}>
-              <img
-                ref={imageRef}
-                src={imageUrl}
-                alt="Puzzle"
-                onLoad={handleImageLoad}
-                onError={handleImageError}
-                style={{
-                  height: '100%',
-                  width: 'auto',
-                  maxWidth: '100%',
-                  objectFit: 'contain',
-                  display: 'block'
-                }}
-              />
-              {imageDimensions.width > 0 && (
-                <GridOverlay
-                  gridWidth={calibrationData.gridWidth}
-                  gridHeight={calibrationData.gridHeight}
-                  cellWidth={calibrationData.cellWidth}
-                  cellHeight={calibrationData.cellHeight}
-                  offsetX={calibrationData.offsetX}
-                  offsetY={calibrationData.offsetY}
-                  solution={solution}
-                  imageWidth={imageDimensions.width}
-                  imageHeight={imageDimensions.height}
-                  onGridChange={setGridData}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-
-        <GridCalibration
-          onCalibrationChange={handleCalibrationChange}
-          onAutoDetect={handleAutoDetect}
-          imageDimensions={imageDimensions}
-        />
-
-        <SolutionImport
-          gridWidth={calibrationData.gridWidth}
-          gridHeight={calibrationData.gridHeight}
-          onSolutionImported={handleSolutionImported}
-        />
-
-        {/* Audio player */}
-        <audio
-          ref={audioRef}
-          src={`/audio/${currentSong}.mp3`}
-          loop
-          preload="auto"
-          onError={(e) => {
-            console.error('Audio error:', e);
-            setIsPlaying(false);
-            alert('Could not load music file. Please try refreshing the page.');
-          }}
-        />
+      {/* Hidden audio element - placed at the root level */}
+      <audio 
+        ref={audioRef}
+        src={`/audio/${currentSong}.mp3`}
+        loop
+        preload="auto"
+        onError={(e) => console.error('Audio error:', e)}
+      />
+      
+      <div style={{ padding: '32px' }}>
+        {/* Song Selection */}
         <div style={{
           position: 'fixed',
-          bottom: '20px',
-          right: '20px',
+          bottom: '32px',
+          right: '32px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '10px',
-          alignItems: 'stretch',
-          zIndex: 1000,
-          minWidth: '180px',
-          backgroundColor: theme.colors.background,
-          padding: '15px',
-          borderRadius: '10px',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+          alignItems: 'flex-end',
+          gap: '16px',
+          zIndex: 1000
         }}>
-          {/* Song Selection Buttons */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 1fr', 
+          <div style={{
+            display: 'flex',
             gap: '8px',
-            marginBottom: '10px'
+            backgroundColor: theme.colors.surface,
+            padding: '8px',
+            borderRadius: '8px',
+            boxShadow: theme.shadows.medium
           }}>
             {(['christmas', 'jingle-bells', 'jingle', 'song1', 'song2'] as const).map((song) => (
               <button
@@ -478,24 +264,17 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
                 onClick={() => changeSong(song)}
                 style={{
                   padding: '8px',
-                  backgroundColor: currentSong === song ? (isPlaying ? '#d32f2f' : theme.colors.accent) : 'transparent',
+                  backgroundColor: currentSong === song ? theme.colors.primary : theme.colors.accent,
                   color: theme.colors.text.inverse,
-                  border: `2px solid ${isPlaying && currentSong === song ? '#d32f2f' : theme.colors.accent}`,
-                  borderRadius: '10px',
+                  border: 'none',
+                  borderRadius: '4px',
                   cursor: 'pointer',
                   fontSize: theme.typography.fontSize.small,
-                  transition: 'all 0.3s ease',
                   opacity: currentSong === song ? 1 : 0.7,
-                  fontWeight: currentSong === song ? 'bold' : 'normal',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
+                  transition: 'all 0.2s ease'
                 }}
               >
-                {currentSong === song ? '🎵 Playing' : song.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                {song.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
               </button>
             ))}
           </div>
@@ -505,7 +284,7 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
             onClick={toggleMusic}
             style={{
               padding: '12px 24px',
-              backgroundColor: isPlaying ? '#d32f2f' : theme.colors.accent,
+              backgroundColor: isPlaying ? theme.colors.error : theme.colors.primary,
               color: theme.colors.text.inverse,
               border: 'none',
               borderRadius: '20px',
@@ -548,15 +327,229 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
             top: '32px',
             left: '32px',
             padding: '8px 16px',
-            backgroundColor: theme.colors.primary,
+            backgroundColor: theme.colors.accent,
             color: theme.colors.text.inverse,
             border: 'none',
             borderRadius: '4px',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
           }}
         >
           ← Back
         </button>
+
+        <div style={{
+          position: 'relative',
+          width: '95%',
+          height: '90vh',
+          backgroundColor: isDarkMode ? '#1a1a1a' : theme.colors.secondary,
+          padding: '32px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+          border: '8px solid #BB2528',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden'
+        }}>
+          {/* Horizontal Ribbon */}
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '-24px',
+            right: '-24px',
+            height: '96px',
+            backgroundColor: theme.colors.accent,
+            transform: 'translateY(-50%)',
+            boxShadow: '0 4px 8px rgba(248,178,41,0.3)',
+            borderRadius: '8px',
+            zIndex: 1
+          }} />
+
+          {/* Vertical Ribbon */}
+          <div style={{
+            position: 'absolute',
+            left: '50%',
+            top: '-24px',
+            bottom: '-24px',
+            width: '96px',
+            backgroundColor: theme.colors.accent,
+            transform: 'translateX(-50%)',
+            boxShadow: '0 4px 8px rgba(248,178,41,0.3)',
+            borderRadius: '8px',
+            zIndex: 1
+          }} />
+
+          {/* Ribbon Bow */}
+          <div style={{
+            position: 'absolute',
+            top: '-40px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 6,
+            width: '180px',
+            height: '90px'
+          }}>
+            {/* Left loop */}
+            <div style={{
+              position: 'absolute',
+              left: '10px',
+              bottom: '15px',
+              width: '70px',
+              height: '45px',
+              background: theme.colors.accent,
+              borderRadius: '35px 35px 0 0',
+              transform: 'rotate(-35deg)',
+              transformOrigin: 'bottom right',
+              boxShadow: '-2px -2px 6px rgba(0,0,0,0.1)'
+            }} />
+
+            {/* Right loop */}
+            <div style={{
+              position: 'absolute',
+              right: '10px',
+              bottom: '15px',
+              width: '70px',
+              height: '45px',
+              background: theme.colors.accent,
+              borderRadius: '35px 35px 0 0',
+              transform: 'rotate(35deg)',
+              transformOrigin: 'bottom left',
+              boxShadow: '2px -2px 6px rgba(0,0,0,0.1)'
+            }} />
+
+            {/* Center knot */}
+            <div style={{
+              position: 'absolute',
+              left: '50%',
+              bottom: '10px',
+              width: '40px',
+              height: '25px',
+              background: theme.colors.accent,
+              transform: 'translateX(-50%)',
+              clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+              zIndex: 2
+            }} />
+
+            {/* Left tail */}
+            <div style={{
+              position: 'absolute',
+              left: '50%',
+              bottom: '-30px',
+              width: '25px',
+              height: '60px',
+              background: theme.colors.accent,
+              transform: 'translateX(-140%) rotate(15deg)',
+              transformOrigin: 'top center',
+              clipPath: 'polygon(0 0, 100% 0, 100% 100%, 20% 100%)',
+              boxShadow: '2px 2px 6px rgba(0,0,0,0.1)'
+            }} />
+
+            {/* Right tail */}
+            <div style={{
+              position: 'absolute',
+              left: '50%',
+              bottom: '-30px',
+              width: '25px',
+              height: '60px',
+              background: theme.colors.accent,
+              transform: 'translateX(40%) rotate(-15deg)',
+              transformOrigin: 'top center',
+              clipPath: 'polygon(0 0, 100% 0, 80% 100%, 0 100%)',
+              boxShadow: '-2px 2px 6px rgba(0,0,0,0.1)'
+            }} />
+          </div>
+
+          {/* White workspace with clipping mask */}
+          <div style={{
+            position: 'absolute',
+            top: '32px',
+            left: '32px',
+            right: '32px',
+            bottom: '32px',
+            backgroundColor: '#FFFFFF',
+            borderRadius: '16px',
+            zIndex: 2
+          }} />
+
+          {/* Content container */}
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            height: 'calc(100vh - 200px)',
+            backgroundColor: isDarkMode ? '#1a1a1a' : theme.colors.surface,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            zIndex: 2,
+            padding: '32px'
+          }}>
+            <div style={{
+              position: 'relative',
+              height: '100%',
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <div className="grid-container" ref={gridRef} style={{
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative'
+              }}>
+                <img
+                  ref={imageRef}
+                  src={imageUrl}
+                  alt="Puzzle"
+                  onLoad={handleImageLoad}
+                  onError={handleImageError}
+                  style={{
+                    height: '100%',
+                    width: 'auto',
+                    maxWidth: '100%',
+                    objectFit: 'contain',
+                    display: 'block'
+                  }}
+                />
+                {imageDimensions.width > 0 && (
+                  <GridOverlay
+                    gridWidth={calibrationData.gridWidth}
+                    gridHeight={calibrationData.gridHeight}
+                    cellWidth={calibrationData.cellWidth}
+                    cellHeight={calibrationData.cellHeight}
+                    offsetX={calibrationData.offsetX}
+                    offsetY={calibrationData.offsetY}
+                    solution={solution}
+                    imageWidth={imageDimensions.width}
+                    imageHeight={imageDimensions.height}
+                    onGridChange={setGridData}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
+          <GridCalibration
+            onCalibrationChange={handleCalibrationChange}
+            onAutoDetect={handleAutoDetect}
+            imageDimensions={imageDimensions}
+          />
+
+          <SolutionImport
+            gridWidth={calibrationData.gridWidth}
+            gridHeight={calibrationData.gridHeight}
+            onSolutionImported={handleSolutionImported}
+          />
+        </div>
       </div>
     </div>
   );
