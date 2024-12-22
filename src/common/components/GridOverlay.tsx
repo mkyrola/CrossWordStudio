@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import theme from '../styles/theme';
+import theme from '../../../styles/theme';
 
 interface GridOverlayProps {
   gridWidth: number;
@@ -37,12 +37,8 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
   // Initialize or update grid when solution changes
   useEffect(() => {
     if (solution) {
-      // For a 10x12 grid, solution should be:
-      // - 12 rows (height)
-      // - 10 cells per row (width)
       const newGrid = solution.map(row =>
         row.map(cell => ({
-
           letter: cell,
           isEditable: cell === ' '
         }))
@@ -199,12 +195,9 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
             backgroundColor: theme.colors.accent,
             color: theme.colors.text.inverse,
             border: 'none',
-            borderRadius: '20px',
+            borderRadius: '4px',
             cursor: 'pointer',
-            fontSize: theme.typography.fontSize.medium,
-            fontWeight: 'bold',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-            zIndex: 4
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
           }}
         >
           Save Grid

@@ -49,7 +49,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       boxShadow: theme.shadows.medium
     }}>
       <button 
-        onClick={onSave} 
+        onClick={() => {
+          console.log('Save button clicked');
+          onSave();
+        }}
         style={{
           ...buttonStyle,
           backgroundColor: theme.colors.primary
