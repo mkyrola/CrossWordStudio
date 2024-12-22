@@ -13,22 +13,72 @@ export interface GridCalibrationData {
 interface GridCalibrationProps {
   onCalibrationChange: (calibration: GridCalibrationData) => void;
   onAutoDetect: () => void;
+  imageDimensions: { width: number; height: number };
 }
 
-const GridCalibration: React.FC<GridCalibrationProps> = ({ onCalibrationChange, onAutoDetect }) => {
+const GridCalibration: React.FC<GridCalibrationProps> = ({ onCalibrationChange, onAutoDetect, imageDimensions }) => {
   const [calibration, setCalibration] = useState<GridCalibrationData>({
     gridWidth: 15,
     gridHeight: 15,
-    cellWidth: 30,
-    cellHeight: 30,
+    cellWidth: Math.floor(imageDimensions.width / 15), // Initialize cell sizes based on image dimensions
+    cellHeight: Math.floor(imageDimensions.height / 15), // Initialize cell sizes based on image dimensions
     offsetX: 0,
     offsetY: 0
   });
 
+  // Initialize calibration with proper cell sizes
+  useEffect(() => {
+    if (imageDimensions.width > 0 && imageDimensions.height > 0) {
+      // Calculate initial cell sizes only if they haven't been set
+      setCalibration(prev => {
+        const initialWidth = prev.cellWidth || Math.floor(imageDimensions.width / prev.gridWidth);
+        const initialHeight = prev.cellHeight || Math.floor(imageDimensions.height / prev.gridHeight);
+        
+        return {
+          ...prev,
+          cellWidth: initialWidth,
+          cellHeight: initialHeight
+        };
+      });
+    }
+  }, [imageDimensions.width, imageDimensions.height]);
+
   const handleChange = (key: keyof GridCalibrationData, value: string) => {
     const numValue = parseInt(value, 10);
     if (!isNaN(numValue)) {
-      const newCalibration = { ...calibration, [key]: numValue };
+      let newCalibration = { ...calibration };
+
+      switch (key) {
+        case 'gridWidth':
+          newCalibration.gridWidth = numValue;
+          if (!newCalibration.cellWidth) {
+            newCalibration.cellWidth = Math.floor(imageDimensions.width / numValue);
+          }
+          break;
+        case 'gridHeight':
+          newCalibration.gridHeight = numValue;
+          if (!newCalibration.cellHeight) {
+            newCalibration.cellHeight = Math.floor(imageDimensions.height / numValue);
+          }
+          break;
+        case 'cellWidth':
+          // Only update width, keep height unchanged
+          newCalibration = {
+            ...newCalibration,
+            cellWidth: Math.max(10, Math.min(100, numValue))
+          };
+          break;
+        case 'cellHeight':
+          // Only update height, keep width unchanged
+          newCalibration = {
+            ...newCalibration,
+            cellHeight: Math.max(10, Math.min(100, numValue))
+          };
+          break;
+        default:
+          newCalibration[key] = Math.max(0, numValue);
+      }
+
       setCalibration(newCalibration);
       onCalibrationChange(newCalibration);
     }
@@ -204,7 +254,7 @@ const GridCalibration: React.FC<GridCalibrationProps> = ({ onCalibrationChange, 
             fontSize: theme.typography.fontSize.small
           }}
         >
-          Cell Width (pixels): {calibration.cellWidth}
+          Cell Width (pixels)
         </label>
         <input
           id="cellWidth"
@@ -213,11 +263,18 @@ const GridCalibration: React.FC<GridCalibrationProps> = ({ onCalibrationChange, 
           max="100"
           value={calibration.cellWidth}
           onChange={(e) => handleChange('cellWidth', e.target.value)}
-          style={{
-            width: '100%',
-            accentColor: theme.colors.primary
-          }}
+          style={{ width: '100%' }}
         />
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          fontSize: theme.typography.fontSize.small,
+          color: theme.colors.text.secondary
+        }}>
+          <span>10px</span>
+          <span>{calibration.cellWidth}px</span>
+          <span>100px</span>
+        </div>
       </div>
 
       {/* Cell Height */}
@@ -231,7 +288,7 @@ const GridCalibration: React.FC<GridCalibrationProps> = ({ onCalibrationChange, 
             fontSize: theme.typography.fontSize.small
           }}
         >
-          Cell Height (pixels): {calibration.cellHeight}
+          Cell Height (pixels)
         </label>
         <input
           id="cellHeight"
@@ -240,14 +297,21 @@ const GridCalibration: React.FC<GridCalibrationProps> = ({ onCalibrationChange, 
           max="100"
           value={calibration.cellHeight}
           onChange={(e) => handleChange('cellHeight', e.target.value)}
-          style={{
-            width: '100%',
-            accentColor: theme.colors.primary
-          }}
+          style={{ width: '100%' }}
         />
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          fontSize: theme.typography.fontSize.small,
+          color: theme.colors.text.secondary
+        }}>
+          <span>10px</span>
+          <span>{calibration.cellHeight}px</span>
+          <span>100px</span>
+        </div>
       </div>
 
-      {/* Offset X */}
+      {/* X Offset */}
       <div style={{ marginBottom: theme.spacing.md }}>
         <label 
           htmlFor="offsetX"
@@ -258,23 +322,30 @@ const GridCalibration: React.FC<GridCalibrationProps> = ({ onCalibrationChange, 
             fontSize: theme.typography.fontSize.small
           }}
         >
-          Offset X: {calibration.offsetX}
+          X Offset
         </label>
         <input
           id="offsetX"
           type="range"
-          min="-100"
-          max="100"
+          min="0"
+          max="500"
           value={calibration.offsetX}
           onChange={(e) => handleChange('offsetX', e.target.value)}
-          style={{
-            width: '100%',
-            accentColor: theme.colors.primary
-          }}
+          style={{ width: '100%' }}
         />
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          fontSize: theme.typography.fontSize.small,
+          color: theme.colors.text.secondary
+        }}>
+          <span>0</span>
+          <span>{calibration.offsetX}px</span>
+          <span>500px</span>
+        </div>
       </div>
 
-      {/* Offset Y */}
+      {/* Y Offset */}
       <div style={{ marginBottom: theme.spacing.md }}>
         <label 
           htmlFor="offsetY"
@@ -285,38 +356,49 @@ const GridCalibration: React.FC<GridCalibrationProps> = ({ onCalibrationChange, 
             fontSize: theme.typography.fontSize.small
           }}
         >
-          Offset Y: {calibration.offsetY}
+          Y Offset
         </label>
         <input
           id="offsetY"
           type="range"
-          min="-100"
-          max="100"
+          min="0"
+          max="500"
           value={calibration.offsetY}
           onChange={(e) => handleChange('offsetY', e.target.value)}
-          style={{
-            width: '100%',
-            accentColor: theme.colors.primary
-          }}
+          style={{ width: '100%' }}
         />
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          fontSize: theme.typography.fontSize.small,
+          color: theme.colors.text.secondary
+        }}>
+          <span>0</span>
+          <span>{calibration.offsetY}px</span>
+          <span>500px</span>
+        </div>
       </div>
 
-      {/* Auto-detect Button */}
       <button
         onClick={onAutoDetect}
         style={{
+          width: '100%',
+          padding: theme.spacing.md,
           backgroundColor: theme.colors.primary,
           color: theme.colors.text.inverse,
           border: 'none',
-          padding: `${theme.spacing.sm} ${theme.spacing.md}`,
           borderRadius: theme.borderRadius.small,
           cursor: 'pointer',
           fontSize: theme.typography.fontSize.medium,
           fontWeight: theme.typography.fontWeight.medium,
-          marginTop: theme.spacing.sm
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: theme.spacing.sm
         }}
       >
-        Auto-detect Grid
+        <span role="img" aria-label="detect">🔍</span>
+        Auto Detect Grid
       </button>
     </div>
   );
