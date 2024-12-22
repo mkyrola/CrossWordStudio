@@ -1,34 +1,64 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { theme } from '../styles/theme';
+import React, { useEffect, useState, useRef } from 'react';
+import theme from '../styles/theme';
 import GridCalibration, { GridCalibrationData } from '../components/GridCalibration';
+import GridOverlay from '../components/GridOverlay';
+import { detectGrid } from '../utils/gridDetection';
 
-const Studio: React.FC = () => {
-  const navigate = useNavigate();
-  const imageUrl = localStorage.getItem('puzzleImageUrl');
+interface StudioProps {
+  imageUrl: string | null;
+  onNavigate: () => void;
+}
+
+const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
   const [calibrationData, setCalibrationData] = useState<GridCalibrationData>({
     gridWidth: 15,
     gridHeight: 15,
+    cellWidth: 30,
+    cellHeight: 30,
     offsetX: 0,
     offsetY: 0
   });
+  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+  const imageRef = useRef<HTMLImageElement>(null);
 
+  // Only navigate away if there's no image URL on mount
   useEffect(() => {
     if (!imageUrl) {
-      navigate('/');
+      console.log('No image URL provided, returning to home');
+      onNavigate();
     }
-    return () => {
-      localStorage.removeItem('puzzleImageUrl');
-    };
-  }, [imageUrl, navigate]);
+  }, []); // Run only on mount
+
+  const handleImageLoad = () => {
+    console.log('Image loaded:', imageRef.current?.naturalWidth, 'x', imageRef.current?.naturalHeight);
+    if (imageRef.current) {
+      const { naturalWidth, naturalHeight } = imageRef.current;
+      setImageDimensions({ width: naturalWidth, height: naturalHeight });
+    }
+  };
+
+  const handleImageError = (error: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error('Failed to load image:', error);
+  };
 
   const handleCalibrationChange = (newCalibration: GridCalibrationData) => {
     setCalibrationData(newCalibration);
-    // TODO: Update grid overlay with new calibration
-    console.log('New calibration:', newCalibration);
+  };
+
+  const handleAutoDetect = async () => {
+    if (!imageUrl) return;
+
+    const result = await detectGrid(imageUrl);
+    if (result.success && result.calibration) {
+      setCalibrationData(result.calibration);
+    } else {
+      console.error('Grid detection failed:', result.error);
+      // TODO: Show error message to user
+    }
   };
 
   if (!imageUrl) {
+    console.log('No imageUrl provided, returning null');
     return null;
   }
 
@@ -43,120 +73,79 @@ const Studio: React.FC = () => {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: '0'
+      padding: '0',
+      overflow: 'hidden'
     }}>
       <div style={{
         position: 'relative',
         width: '95%',
-        height: '100%',
-        backgroundColor: theme.colors.secondary,
+        height: '90vh',
+        backgroundColor: theme.colors.surface,
         padding: '32px',
         boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
         border: '8px solid #BB2528',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        overflow: 'hidden'
       }}>
-        {/* Horizontal Ribbon */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '-24px',
-          right: '-24px',
-          height: '96px',
-          backgroundColor: theme.colors.accent,
-          transform: 'translateY(-50%)',
-          boxShadow: '0 4px 8px rgba(248,178,41,0.3)',
-          borderRadius: '8px',
-          zIndex: 1
-        }} />
-
-        {/* Vertical Ribbon */}
-        <div style={{
-          position: 'absolute',
-          left: '50%',
-          top: '-24px',
-          bottom: '-24px',
-          width: '96px',
-          backgroundColor: theme.colors.accent,
-          transform: 'translateX(-50%)',
-          boxShadow: '0 4px 8px rgba(248,178,41,0.3)',
-          borderRadius: '8px',
-          zIndex: 1
-        }} />
-
-        {/* Image Container */}
         <div style={{
           position: 'relative',
-          width: '90%',
-          height: '90%',
-          backgroundColor: '#FFFFFF',
-          borderRadius: '16px',
-          padding: theme.spacing.md,
-          zIndex: 2,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+          width: '100%',
+          height: '100%',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          overflow: 'hidden',
+          zIndex: 2
         }}>
-          <img 
-            src={imageUrl} 
-            alt="Crossword Puzzle"
+          <img
+            ref={imageRef}
+            src={imageUrl}
+            alt="Puzzle"
+            onLoad={handleImageLoad}
+            onError={handleImageError}
             style={{
               maxWidth: '100%',
               maxHeight: '100%',
               objectFit: 'contain',
-              borderRadius: '8px'
+              display: 'block'
             }}
           />
-          {/* TODO: Add grid overlay here using calibrationData */}
+          {imageDimensions.width > 0 && (
+            <GridOverlay
+              calibrationData={calibrationData}
+              imageWidth={imageDimensions.width}
+              imageHeight={imageDimensions.height}
+            />
+          )}
         </div>
 
-        {/* Grid Calibration Panel */}
-        <GridCalibration onCalibrationChange={handleCalibrationChange} />
+        <GridCalibration
+          onCalibrationChange={handleCalibrationChange}
+          onAutoDetect={handleAutoDetect}
+        />
 
-        {/* Ribbon Bow - Left Loop */}
-        <div style={{
-          position: 'absolute',
-          top: '-30px',
-          left: '50%',
-          marginLeft: '-45px',
-          width: '45px',
-          height: '45px',
-          backgroundColor: theme.colors.accent,
-          borderRadius: '45px 0 0 45px',
-          transform: 'rotate(-15deg)',
-          boxShadow: '0 4px 8px rgba(248,178,41,0.3)',
-          zIndex: 3
-        }} />
-
-        {/* Ribbon Bow - Right Loop */}
-        <div style={{
-          position: 'absolute',
-          top: '-30px',
-          left: '50%',
-          width: '45px',
-          height: '45px',
-          backgroundColor: theme.colors.accent,
-          borderRadius: '0 45px 45px 0',
-          transform: 'rotate(15deg)',
-          boxShadow: '0 4px 8px rgba(248,178,41,0.3)',
-          zIndex: 3
-        }} />
-
-        {/* Ribbon Bow - Center Knot */}
-        <div style={{
-          position: 'absolute',
-          top: '-25px',
-          left: '50%',
-          width: '32px',
-          height: '32px',
-          backgroundColor: theme.colors.accent,
-          borderRadius: '50%',
-          transform: 'translateX(-50%)',
-          boxShadow: '0 4px 8px rgba(248,178,41,0.3)',
-          zIndex: 4
-        }} />
+        {/* Back Button */}
+        <button
+          onClick={onNavigate}
+          style={{
+            position: 'absolute',
+            top: '16px',
+            left: '16px',
+            backgroundColor: theme.colors.primary,
+            color: theme.colors.text.inverse,
+            border: 'none',
+            padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+            borderRadius: theme.borderRadius.small,
+            cursor: 'pointer',
+            fontSize: theme.typography.fontSize.medium,
+            fontWeight: theme.typography.fontWeight.medium,
+            zIndex: 3
+          }}
+        >
+          ← Back
+        </button>
       </div>
     </div>
   );

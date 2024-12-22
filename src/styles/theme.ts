@@ -1,4 +1,4 @@
-export const theme = {
+const theme = {
   colors: {
     primary: '#146B3A',    // Christmas green
     secondary: '#BB2528',  // Christmas red
@@ -49,6 +49,8 @@ export const theme = {
     mobile: '320px',
     tablet: '768px',
     desktop: '1024px',
-    wide: '1280px'
+    wide: '1440px'
   }
-}
+} as const;
+
+export default theme;
