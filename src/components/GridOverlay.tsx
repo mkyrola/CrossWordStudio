@@ -11,6 +11,7 @@ interface GridOverlayProps {
   solution?: string[][];
   imageWidth: number;
   imageHeight: number;
+  onGridChange?: (grid: CellState[][]) => void;
 }
 
 interface CellState {
@@ -27,7 +28,8 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
   offsetY,
   solution,
   imageWidth,
-  imageHeight
+  imageHeight,
+  onGridChange
 }) => {
   const [grid, setGrid] = useState<CellState[][]>([]);
   const [showSaveButton, setShowSaveButton] = useState(false);
@@ -40,6 +42,7 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
       // - 10 cells per row (width)
       const newGrid = solution.map(row =>
         row.map(cell => ({
+
           letter: cell,
           isEditable: cell === ' '
         }))
@@ -57,6 +60,13 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
       setShowSaveButton(false);
     }
   }, [solution, gridWidth, gridHeight]);
+
+  // Update parent when grid changes
+  useEffect(() => {
+    if (onGridChange) {
+      onGridChange(grid);
+    }
+  }, [grid, onGridChange]);
 
   const toggleCellEditable = (rowIndex: number, colIndex: number) => {
     if (!grid[rowIndex][colIndex].letter) {
@@ -101,7 +111,7 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
             y2={i * cellHeight}
             stroke="red"
             strokeWidth="1"
-            opacity="0.5"
+            opacity="1"
           />
         ))}
         {Array(gridWidth + 1).fill(0).map((_, i) => (
@@ -113,24 +123,24 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
             y2={gridHeight * cellHeight}
             stroke="red"
             strokeWidth="1"
-            opacity="0.5"
+            opacity="1"
           />
         ))}
 
         {/* Draw solution cells */}
         {grid.map((row, y) => row.map((cell, x) => (
           <g key={`${x}-${y}`}>
-            {/* Cell background */}
+            {/* Cell background - fully transparent */}
             <rect
               x={x * cellWidth}
               y={y * cellHeight}
               width={cellWidth}
               height={cellHeight}
-              fill={cell.letter === ' ' ? '#f0f0f0' : 'white'}
-              fillOpacity="0.5"
+              fill={cell.letter === ' ' ? '#f0f0f0' : 'transparent'}
+              fillOpacity={cell.letter === ' ' ? "0.9" : "0"}
               stroke="none"
             />
-            
+
             {/* Cross for space cells */}
             {cell.letter === ' ' && (
               <>
@@ -141,7 +151,7 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
                   y2={(y + 1) * cellHeight}
                   stroke="black"
                   strokeWidth="1"
-                  opacity="0.3"
+                  opacity="0.8"
                 />
                 <line
                   x1={(x + 1) * cellWidth}
@@ -150,7 +160,7 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
                   y2={(y + 1) * cellHeight}
                   stroke="black"
                   strokeWidth="1"
-                  opacity="0.3"
+                  opacity="0.8"
                 />
               </>
             )}

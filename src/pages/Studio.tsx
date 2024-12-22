@@ -3,7 +3,9 @@ import theme from '../styles/theme';
 import GridCalibration, { GridCalibrationData } from '../components/GridCalibration';
 import { GridOverlay } from '../components/GridOverlay';
 import { SolutionImport } from '../components/SolutionImport';
+import { Toolbar } from '../components/Toolbar';
 import { detectGrid } from '../utils/gridDetection';
+import { exportToJson, printPuzzle } from '../utils/exportUtils';
 
 interface StudioProps {
   imageUrl: string | null;
@@ -22,10 +24,13 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
   const [solution, setSolution] = useState<string[][]>();
   const [imageBounds, setImageBounds] = useState({ left: 0, top: 0 });
+  const [gridData, setGridData] = useState<{ letter: string; isEditable: boolean }[][]>([]);
   const imageRef = useRef<HTMLImageElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSong, setCurrentSong] = useState<'song1' | 'song2'>('song1');
   const audioRef = useRef<HTMLAudioElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Only navigate away if there's no image URL on mount
   useEffect(() => {
@@ -73,6 +78,7 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
 
         // Only set initial cell sizes if they haven't been manually adjusted
         setCalibrationData(prev => ({
+
           ...prev,
           cellWidth: prev.cellWidth === 1 ? Math.floor(scaledWidth / prev.gridWidth) : prev.cellWidth,
           cellHeight: prev.cellHeight === 1 ? Math.floor(scaledHeight / prev.gridHeight) : prev.cellHeight,
@@ -179,19 +185,37 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
     }
   };
 
+  const handleSaveGrid = () => {
+    if (!gridData.length) {
+      alert('Please create a grid first');
+      return;
+    }
+    exportToJson(gridData);
+  };
+
+  const handlePrint = async () => {
+    if (!imageUrl || !gridData.length) {
+      alert('Please create a grid first');
+      return;
+    }
+    await printPuzzle(imageUrl, gridData);
+  };
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    document.body.style.backgroundColor = isDarkMode ? '#F0F4F7' : '#1a1a1a';
+  };
+
   if (!imageUrl) {
     console.log('No imageUrl provided, returning null');
     return null;
   }
 
   return (
-    <div style={{
+    <div className="App" style={{
+      backgroundColor: isDarkMode ? '#1a1a1a' : '#F0F4F7',
       minHeight: '100vh',
       height: '100vh',
-      background: `linear-gradient(135deg, 
-        ${theme.colors.secondary} 0%, 
-        #d42d30 50%, 
-        ${theme.colors.secondary} 100%)`,
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -202,7 +226,7 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
         position: 'relative',
         width: '95%',
         height: '90vh',
-        backgroundColor: theme.colors.secondary,
+        backgroundColor: isDarkMode ? '#1a1a1a' : theme.colors.secondary,
         padding: '32px',
         boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
         border: '8px solid #BB2528',
@@ -337,7 +361,7 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
           position: 'relative',
           width: '100%',
           height: 'calc(100vh - 200px)',
-          backgroundColor: theme.colors.surface,
+          backgroundColor: isDarkMode ? '#1a1a1a' : theme.colors.surface,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -348,36 +372,47 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
           <div style={{
             position: 'relative',
             height: '100%',
+            width: '100%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <img
-              ref={imageRef}
-              src={imageUrl}
-              alt="Puzzle"
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-              style={{
-                height: '100%',
-                width: 'auto',
-                objectFit: 'contain',
-                display: 'block'
-              }}
-            />
-            {imageDimensions.width > 0 && (
-              <GridOverlay
-                gridWidth={calibrationData.gridWidth}
-                gridHeight={calibrationData.gridHeight}
-                cellWidth={calibrationData.cellWidth}
-                cellHeight={calibrationData.cellHeight}
-                offsetX={calibrationData.offsetX}
-                offsetY={calibrationData.offsetY}
-                solution={solution}
-                imageWidth={imageDimensions.width}
-                imageHeight={imageDimensions.height}
+            <div className="grid-container" ref={gridRef} style={{
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative'
+            }}>
+              <img
+                ref={imageRef}
+                src={imageUrl}
+                alt="Puzzle"
+                onLoad={handleImageLoad}
+                onError={handleImageError}
+                style={{
+                  height: '100%',
+                  width: 'auto',
+                  maxWidth: '100%',
+                  objectFit: 'contain',
+                  display: 'block'
+                }}
               />
-            )}
+              {imageDimensions.width > 0 && (
+                <GridOverlay
+                  gridWidth={calibrationData.gridWidth}
+                  gridHeight={calibrationData.gridHeight}
+                  cellWidth={calibrationData.cellWidth}
+                  cellHeight={calibrationData.cellHeight}
+                  offsetX={calibrationData.offsetX}
+                  offsetY={calibrationData.offsetY}
+                  solution={solution}
+                  imageWidth={imageDimensions.width}
+                  imageHeight={imageDimensions.height}
+                  onGridChange={setGridData}
+                />
+              )}
+            </div>
           </div>
         </div>
 
@@ -406,98 +441,49 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
           }}
         />
         <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
+          position: 'absolute',
+          bottom: '32px',
+          left: '50%',
+          transform: 'translateX(-50%)',
           display: 'flex',
-          flexDirection: 'column',
-          gap: '10px',
-          alignItems: 'stretch',
-          zIndex: 1000,
-          minWidth: '180px'
+          gap: '16px'
         }}>
-          <button
-            onClick={() => changeSong('song1')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: currentSong === 'song1' ? (isPlaying ? '#d32f2f' : theme.colors.accent) : 'transparent',
-              color: theme.colors.text.inverse,
-              border: `2px solid ${isPlaying ? '#d32f2f' : theme.colors.accent}`,
-              borderRadius: '20px',
-              cursor: 'pointer',
-              fontSize: theme.typography.fontSize.small,
-              transition: 'all 0.3s ease',
-              opacity: currentSong === 'song1' ? 1 : 0.7,
-              fontWeight: currentSong === 'song1' ? 'bold' : 'normal'
-            }}
-          >
-            {currentSong === 'song1' ? '🎵 Now Playing' : '▶️ Song 1'}
-          </button>
-          <button
-            onClick={() => changeSong('song2')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: currentSong === 'song2' ? (isPlaying ? '#d32f2f' : theme.colors.accent) : 'transparent',
-              color: theme.colors.text.inverse,
-              border: `2px solid ${isPlaying ? '#d32f2f' : theme.colors.accent}`,
-              borderRadius: '20px',
-              cursor: 'pointer',
-              fontSize: theme.typography.fontSize.small,
-              transition: 'all 0.3s ease',
-              opacity: currentSong === 'song2' ? 1 : 0.7,
-              fontWeight: currentSong === 'song2' ? 'bold' : 'normal'
-            }}
-          >
-            {currentSong === 'song2' ? '🎵 Now Playing' : '▶️ Song 2'}
-          </button>
+          {/* Audio controls */}
           <button
             onClick={toggleMusic}
             style={{
-              padding: '12px 24px',
-              backgroundColor: isPlaying ? '#d32f2f' : theme.colors.accent,
+              padding: '8px 16px',
+              backgroundColor: theme.colors.primary,
               color: theme.colors.text.inverse,
               border: 'none',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-              fontSize: theme.typography.fontSize.medium,
-              transition: 'all 0.3s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              userSelect: 'none',
-              fontWeight: 'bold'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)';
-              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+              borderRadius: '4px',
+              cursor: 'pointer'
             }}
           >
-            {isPlaying ? '🔇 Stop Music' : '🎵 Play Music'}
+            {isPlaying ? '🔇 Mute Music' : '🎵 Play Music'}
           </button>
         </div>
+
+        <Toolbar
+          onSave={handleSaveGrid}
+          onPrint={handlePrint}
+          onToggleDarkMode={toggleDarkMode}
+          isDarkMode={isDarkMode}
+        />
 
         {/* Back Button */}
         <button
           onClick={onNavigate}
           style={{
             position: 'absolute',
-            top: '16px',
-            left: '16px',
+            top: '32px',
+            left: '32px',
+            padding: '8px 16px',
             backgroundColor: theme.colors.primary,
             color: theme.colors.text.inverse,
             border: 'none',
-            padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-            borderRadius: theme.borderRadius.small,
-            cursor: 'pointer',
-            fontSize: theme.typography.fontSize.medium,
-            fontWeight: theme.typography.fontWeight.medium,
-            zIndex: 3
+            borderRadius: '4px',
+            cursor: 'pointer'
           }}
         >
           ← Back
