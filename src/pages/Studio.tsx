@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import theme from '../styles/theme';
 import GridCalibration, { GridCalibrationData } from '../components/GridCalibration';
 import GridOverlay from '../components/GridOverlay';
+import SolutionImport from '../components/SolutionImport';
 import { detectGrid } from '../utils/gridDetection';
 
 interface StudioProps {
@@ -19,6 +20,7 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
     offsetY: 0
   });
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+  const [solutionMatrix, setSolutionMatrix] = useState<string[][] | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
   // Only navigate away if there's no image URL on mount
@@ -124,6 +126,12 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
         <GridCalibration
           onCalibrationChange={handleCalibrationChange}
           onAutoDetect={handleAutoDetect}
+        />
+
+        <SolutionImport
+          onSolutionImport={setSolutionMatrix}
+          gridWidth={calibrationData.gridWidth}
+          gridHeight={calibrationData.gridHeight}
         />
 
         {/* Back Button */}

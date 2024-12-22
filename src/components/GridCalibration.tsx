@@ -37,7 +37,7 @@ const GridCalibration: React.FC<GridCalibrationProps> = ({ onCalibrationChange, 
   return (
     <div style={{
       position: 'absolute',
-      right: window.innerWidth < 600 ? '16px' : '32px',
+      left: window.innerWidth < 600 ? '16px' : '32px',
       top: '50%',
       transform: 'translateY(-50%)',
       backgroundColor: theme.colors.surface,
