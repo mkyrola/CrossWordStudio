@@ -27,7 +27,7 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
   const [gridData, setGridData] = useState<{ letter: string; isEditable: boolean }[][]>([]);
   const imageRef = useRef<HTMLImageElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentSong, setCurrentSong] = useState<'song1' | 'song2'>('song1');
+  const [currentSong, setCurrentSong] = useState<'christmas' | 'jingle-bells' | 'jingle' | 'song1' | 'song2'>('christmas');
   const audioRef = useRef<HTMLAudioElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -78,7 +78,6 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
 
         // Only set initial cell sizes if they haven't been manually adjusted
         setCalibrationData(prev => ({
-
           ...prev,
           cellWidth: prev.cellWidth === 1 ? Math.floor(scaledWidth / prev.gridWidth) : prev.cellWidth,
           cellHeight: prev.cellHeight === 1 ? Math.floor(scaledHeight / prev.gridHeight) : prev.cellHeight,
@@ -145,43 +144,54 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const toggleMusic = () => {
+  const changeSong = async (song: 'christmas' | 'jingle-bells' | 'jingle' | 'song1' | 'song2') => {
     if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-      } else {
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              setIsPlaying(true);
-            })
-            .catch(error => {
-              console.error('Error playing audio:', error);
-              setIsPlaying(false);
-              alert('Could not play music. Please try again.');
-            });
+      const wasPlaying = isPlaying;
+      // Pause current playback
+      audioRef.current.pause();
+      setIsPlaying(false);
+      
+      // Change the source
+      setCurrentSong(song);
+      audioRef.current.src = `/audio/${song}.mp3`;
+
+      // Wait for the audio to be loaded before playing
+      try {
+        await audioRef.current.load();
+        if (wasPlaying) {
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            await playPromise;
+            setIsPlaying(true);
+          }
         }
+      } catch (error) {
+        console.error('Error loading or playing audio:', error);
+        setIsPlaying(false);
+        alert('Could not load or play the selected song. Please try again.');
       }
     }
   };
 
-  const changeSong = (song: 'song1' | 'song2') => {
+  const toggleMusic = async () => {
     if (audioRef.current) {
-      const wasPlaying = !audioRef.current.paused;
-      audioRef.current.pause();
-      setCurrentSong(song);
-      
-      // Need to wait a bit for the new source to load
-      setTimeout(() => {
-        if (wasPlaying && audioRef.current) {
+      try {
+        if (isPlaying) {
+          audioRef.current.pause();
+          setIsPlaying(false);
+        } else {
+          await audioRef.current.load();
           const playPromise = audioRef.current.play();
           if (playPromise !== undefined) {
-            playPromise.catch(console.error);
+            await playPromise;
+            setIsPlaying(true);
           }
         }
-      }, 100);
+      } catch (error) {
+        console.error('Error playing audio:', error);
+        setIsPlaying(false);
+        alert('Could not play the audio. Please try again.');
+      }
     }
   };
 
@@ -441,26 +451,85 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
           }}
         />
         <div style={{
-          position: 'absolute',
-          bottom: '32px',
-          left: '50%',
-          transform: 'translateX(-50%)',
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
           display: 'flex',
-          gap: '16px'
+          flexDirection: 'column',
+          gap: '10px',
+          alignItems: 'stretch',
+          zIndex: 1000,
+          minWidth: '180px',
+          backgroundColor: theme.colors.background,
+          padding: '15px',
+          borderRadius: '10px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
         }}>
-          {/* Audio controls */}
+          {/* Song Selection Buttons */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '1fr 1fr', 
+            gap: '8px',
+            marginBottom: '10px'
+          }}>
+            {(['christmas', 'jingle-bells', 'jingle', 'song1', 'song2'] as const).map((song) => (
+              <button
+                key={song}
+                onClick={() => changeSong(song)}
+                style={{
+                  padding: '8px',
+                  backgroundColor: currentSong === song ? (isPlaying ? '#d32f2f' : theme.colors.accent) : 'transparent',
+                  color: theme.colors.text.inverse,
+                  border: `2px solid ${isPlaying && currentSong === song ? '#d32f2f' : theme.colors.accent}`,
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontSize: theme.typography.fontSize.small,
+                  transition: 'all 0.3s ease',
+                  opacity: currentSong === song ? 1 : 0.7,
+                  fontWeight: currentSong === song ? 'bold' : 'normal',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {currentSong === song ? '🎵 Playing' : song.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+              </button>
+            ))}
+          </div>
+          
+          {/* Play/Stop Button */}
           <button
             onClick={toggleMusic}
             style={{
-              padding: '8px 16px',
-              backgroundColor: theme.colors.primary,
+              padding: '12px 24px',
+              backgroundColor: isPlaying ? '#d32f2f' : theme.colors.accent,
               color: theme.colors.text.inverse,
               border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
+              borderRadius: '20px',
+              cursor: 'pointer',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+              fontSize: theme.typography.fontSize.medium,
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              userSelect: 'none',
+              fontWeight: 'bold'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
             }}
           >
-            {isPlaying ? '🔇 Mute Music' : '🎵 Play Music'}
+            {isPlaying ? '🔇 Stop Music' : '🎵 Play Music'}
           </button>
         </div>
 
