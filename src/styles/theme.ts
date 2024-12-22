@@ -1,16 +1,16 @@
 const theme = {
   colors: {
-    primary: '#BB2528',    // Christmas red (switched from green)
+    primary: '#146B3A',    // Christmas green
     secondary: '#BB2528',  // Christmas red
-    accent: '#BB2528',     // Red (removed gold)
+    accent: '#F8B229',     // Christmas gold/yellow
     background: '#F0F4F7', // Snow white
     surface: '#FFFFFF',    // Pure white
     text: {
-      primary: '#2F4F4F',  // Dark green-gray
-      secondary: '#BB2528', // Changed to red
-      inverse: '#FFFFFF'    // White
+      primary: '#2F4F4F',   // Dark slate gray for main text
+      secondary: '#666666', // Medium gray for secondary text
+      inverse: '#FFFFFF'    // White for text on dark backgrounds
     },
-    border: '#BB2528',     // Christmas red
+    border: '#146B3A',     // Christmas green
     success: '#146B3A',    // Christmas green
     error: '#BB2528'       // Christmas red
   },
@@ -41,9 +41,9 @@ const theme = {
     large: '12px'
   },
   shadows: {
-    small: '0 2px 4px rgba(187,37,40,0.1)',   // Updated to red shadows
-    medium: '0 4px 6px rgba(187,37,40,0.15)',  // Updated to red shadows
-    large: '0 8px 16px rgba(187,37,40,0.2)'    // Updated to red shadows
+    small: '0 2px 4px rgba(0,0,0,0.1)',   // Black shadows
+    medium: '0 4px 6px rgba(0,0,0,0.15)',  // Black shadows
+    large: '0 8px 16px rgba(0,0,0,0.2)'    // Black shadows
   },
   breakpoints: {
     mobile: '320px',

@@ -18,8 +18,7 @@ export const Creator: React.FC = () => {
   };
 
   const handleNavigate = () => {
-    // Navigate to studio or handle skip action
-    console.log('Navigate or skip action');
+    navigate('/');
   };
 
   if (!imageUrl) {
