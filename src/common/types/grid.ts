@@ -1,5 +1,5 @@
 export interface GridCell {
-  value: string;
+  letter: string;
   isBlocked: boolean;
   number?: number;
 }
@@ -9,6 +9,11 @@ export interface GridDimensions {
   columns: number;
   cellWidth: number;
   cellHeight: number;
+}
+
+export interface GridOffset {
+  x: number;
+  y: number;
 }
 
 export interface WordHighlight {

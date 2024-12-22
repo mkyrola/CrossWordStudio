@@ -1,12 +1,10 @@
 export interface PuzzleWord {
-  id: string;
   number: number;
-  clue: string;
-  answer: string;
+  direction: 'across' | 'down';
   startX: number;
   startY: number;
   length: number;
-  direction: 'across' | 'down';
+  answer: string;
 }
 
 export interface PuzzleCell {
@@ -21,22 +19,8 @@ export interface PuzzleCell {
   };
 }
 
-export interface PuzzleClue {
-  number: number;
-  clue: string;
-  direction: 'across' | 'down';
-}
-
-export interface PuzzleMetadata {
-  id: string;
-  name: string;
-  author: string;
-  difficulty: 'easy' | 'medium' | 'hard';
-  date: string;
-}
-
 export interface CrosswordPuzzle {
-  metadata: PuzzleMetadata;
+  name: string;
   dimensions: {
     width: number;
     height: number;
