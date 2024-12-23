@@ -183,19 +183,19 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUpload, onNavigate }) 
         <button
           onClick={onNavigate}
           style={{
-            padding: '8px 16px',
+            padding: theme.spacing.md,
             backgroundColor: 'transparent',
             color: theme.colors.text.primary,
             border: `1px solid ${theme.colors.border}`,
-            borderRadius: '4px',
+            borderRadius: theme.borderRadius.medium,
             cursor: 'pointer',
             fontSize: '1rem',
             transition: 'all 0.3s ease'
           }}
-          onMouseOver={(e) => {
+          onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = `${theme.colors.border}20`;
           }}
-          onMouseOut={(e) => {
+          onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'transparent';
           }}
         >

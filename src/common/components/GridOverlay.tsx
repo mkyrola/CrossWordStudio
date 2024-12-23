@@ -11,7 +11,7 @@ interface GridOverlayProps {
   solution?: string[][];
   imageWidth: number;
   imageHeight: number;
-  onGridChange?: (grid: CellState[][]) => void;
+  onGridChange: (newGrid: CellState[][]) => void;
 }
 
 export interface CellState {
@@ -92,35 +92,49 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
       <svg
         width={imageWidth}
         height={imageHeight}
-        style={{ position: 'absolute', top: 0, left: 0 }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          pointerEvents: 'none'
+        }}
+        viewBox={`0 0 ${imageWidth} ${imageHeight}`}
+        preserveAspectRatio="none"
       >
-        {/* Draw grid lines */}
-        {grid.map((row, rowIndex) => (
-          row.map((cell, colIndex) => (
-            <g key={`cell-${rowIndex}-${colIndex}`}>
-              <rect
-                x={colIndex * cellWidth}
-                y={rowIndex * cellHeight}
-                width={cellWidth}
-                height={cellHeight}
-                fill={!cell.isEditable ? theme.colors.background : theme.colors.surface}
-                stroke={theme.colors.border}
-                strokeWidth="1"
-                onClick={() => toggleCellEditable(rowIndex, colIndex)}
-              />
-              {cell.letter !== ' ' && (
-                <text
-                  x={colIndex * cellWidth + 2}
-                  y={rowIndex * cellHeight + 8}
-                  fontSize="8"
-                  fill={theme.colors.text.secondary}
-                >
-                  {cell.letter}
-                </text>
-              )}
-            </g>
-          ))
-        ))}
+        <g 
+          style={{ pointerEvents: 'auto' }}
+          transform={`translate(${offsetX}, ${offsetY})`}
+        >
+          {grid.map((row, rowIndex) => (
+            row.map((cell, colIndex) => {
+              return (
+                <g key={`cell-${rowIndex}-${colIndex}`}>
+                  <rect
+                    x={colIndex * cellWidth}
+                    y={rowIndex * cellHeight}
+                    width={cellWidth}
+                    height={cellHeight}
+                    fill={!cell.isEditable ? theme.colors.background : theme.colors.surface}
+                    stroke={theme.colors.border}
+                    strokeWidth="1"
+                    onClick={() => toggleCellEditable(rowIndex, colIndex)}
+                  />
+                  {cell.letter !== ' ' && (
+                    <text
+                      x={colIndex * cellWidth + cellWidth * 0.1}
+                      y={rowIndex * cellHeight + cellHeight * 0.2}
+                      fontSize={Math.min(cellWidth, cellHeight) * 0.2}
+                      fill={theme.colors.text.secondary}
+                      style={{ pointerEvents: 'none' }}
+                    >
+                      {cell.letter}
+                    </text>
+                  )}
+                </g>
+              );
+            })
+          ))}
+        </g>
       </svg>
 
       {showSaveButton && (

@@ -4,10 +4,11 @@ import GridCalibration, { GridCalibrationData } from '../components/GridCalibrat
 import { GridOverlay, CellState } from '../components/GridOverlay';
 import { SolutionImport } from '../components/SolutionImport';
 import Toolbar from '../components/Toolbar';
-import { PuzzleSave } from '../components/PuzzleSave';
 import { detectGrid } from '../utils/gridDetection';
 import { exportToJson, printPuzzle } from '../utils/exportUtils';
 import { GridCell } from '../types/grid';
+import SavePuzzleDialog from '../creator/components/SavePuzzleDialog';
+import { generatePuzzleFiles, savePuzzleFiles } from '../creator/utils/puzzleFileGenerator';
 
 interface StudioProps {
   imageUrl: string | null;
@@ -33,7 +34,8 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Only navigate away if there's no image URL on mount
   useEffect(() => {
@@ -211,25 +213,44 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
 
   const handleSaveGrid = () => {
     console.log('Save grid clicked');
-    console.log('Grid data:', gridData);
-    console.log('Grid data length:', gridData.length);
-    console.log('Show save dialog state:', showSaveDialog);
     
-    if (!gridData || !gridData.length) {
-      console.log('No grid data available');
-      alert('Please create a grid first');
+    if (!solution || !solution.length) {
+      console.log('No solution available');
+      alert('Please import a solution first');
+      return;
+    }
+    
+    if (!imageUrl) {
+      console.log('No image available');
+      alert('Please upload an image first');
       return;
     }
     
     console.log('Opening save dialog');
-    setShowSaveDialog(true);
-    console.log('Set show save dialog to true');
+    setIsSaveDialogOpen(true);
   };
 
-  const handleSaveComplete = () => {
-    console.log('Save completed, closing dialog');
-    setShowSaveDialog(false);
-    console.log('Set show save dialog to false');
+  const handleSavePuzzle = async (puzzleName: string) => {
+    try {
+      // Generate all puzzle files
+      const files = generatePuzzleFiles(solution);
+
+      // Get the image file from URL
+      const imageResponse = await fetch(imageUrl);
+      const imageBlob = await imageResponse.blob();
+
+      // Save all files
+      await savePuzzleFiles(puzzleName, files, imageBlob);
+
+      // Close dialog and show success message
+      setIsSaveDialogOpen(false);
+      setSaveError(null);
+      
+      // Navigate back to home
+      onNavigate();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Failed to save puzzle');
+    }
   };
 
   const handlePrint = async () => {
@@ -266,20 +287,15 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      height: '100%',
+      height: 'calc(100vh - 64px)', // Account for header
       position: 'relative',
       overflow: 'hidden'
     }}>
       {/* Hidden audio element */}
-      <audio 
+      <audio
         ref={audioRef}
-        src={`/audio/${currentSong}.mp3`}
-        loop
-        preload="auto"
-        onError={(e) => {
-          console.error('Audio error:', e);
-          setIsPlaying(false);
-          alert('Could not load music file. Please try refreshing the page.');
+        style={{
+          display: 'none'
         }}
       />
 
@@ -288,8 +304,8 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden',
-        position: 'relative'
+        position: 'relative',
+        height: 'calc(100vh - 112px)' // Account for header (64px) and bottom controls (48px)
       }}>
         {/* Toolbar */}
         <Toolbar
@@ -309,13 +325,16 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
         <div style={{
           flex: 1,
           position: 'relative',
-          overflow: 'hidden',
-          margin: '4px'
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px',
+          overflow: 'hidden'
         }}>
           <div style={{
             position: 'relative',
-            width: '100%',
-            height: '100%',
+            maxHeight: '100%',
+            maxWidth: '100%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -327,8 +346,8 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
               onLoad={handleImageLoad}
               onError={handleImageError}
               style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
+                maxHeight: 'calc(100vh - 184px)', // Account for header (64px), padding (32px), and bottom controls (48px)
+                width: 'auto',
                 objectFit: 'contain'
               }}
             />
@@ -447,12 +466,28 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
         ←
       </button>
 
-      {/* Save Dialog */}
-      {showSaveDialog && (
-        <PuzzleSave
-          grid={gridData}
-          onClose={handleSaveComplete}
-        />
+      {/* Save Puzzle Dialog */}
+      <SavePuzzleDialog
+        isOpen={isSaveDialogOpen}
+        onClose={() => setIsSaveDialogOpen(false)}
+        onSave={handleSavePuzzle}
+      />
+
+      {/* Error Message */}
+      {saveError && (
+        <div style={{
+          position: 'fixed',
+          bottom: theme.spacing.lg,
+          right: theme.spacing.lg,
+          padding: theme.spacing.lg,
+          backgroundColor: theme.colors.error,
+          color: theme.colors.text.inverse,
+          borderRadius: theme.borderRadius.medium,
+          boxShadow: theme.shadows.medium,
+          zIndex: 1000
+        }}>
+          {saveError}
+        </div>
       )}
     </div>
   );

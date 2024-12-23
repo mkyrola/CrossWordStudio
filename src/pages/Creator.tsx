@@ -41,7 +41,8 @@ const Creator: React.FC = () => {
             flex: 1,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            padding: theme.spacing.lg
           }}>
             <ImageUpload onImageUpload={handleImageUpload} onNavigate={() => navigate('/')} />
           </div>
