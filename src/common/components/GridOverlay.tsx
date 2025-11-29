@@ -82,8 +82,11 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
   };
 
   const handleSaveGrid = () => {
-    // TODO: Implement save functionality
-    console.log('Saving grid:', grid);
+    // Grid save is handled by parent component via onGridChange callback
+    // This button triggers the parent's save logic
+    if (onGridChange) {
+      onGridChange(grid);
+    }
   };
 
   return (

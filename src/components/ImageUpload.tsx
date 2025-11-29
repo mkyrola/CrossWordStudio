@@ -13,7 +13,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUpload, onNavigate }) 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  const handleImageValidation = async (file: File) => {
+  const handleImageValidation = useCallback(async (file: File) => {
     try {
       const result = await validateImage(file);
       if (result.isValid) {
@@ -25,9 +25,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUpload, onNavigate }) 
       }
     } catch (err) {
       setError('Failed to process image');
-      console.error('Image validation error:', err);
+      // Error logged in development only
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('Image validation error:', err);
+      }
     }
-  };
+  }, [onImageUpload, onNavigate]);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -64,14 +67,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUpload, onNavigate }) 
     } else {
       setError('Please drop an image file');
     }
-  }, []);
+  }, [handleImageValidation]);
 
   const handleFileInput = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files[0]) {
       await handleImageValidation(files[0]);
     }
-  }, []);
+  }, [handleImageValidation]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();

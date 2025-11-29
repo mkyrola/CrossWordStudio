@@ -144,9 +144,12 @@ export const savePuzzle = async (puzzle: CrosswordPuzzle): Promise<void> => {
   const blob = new Blob([jsonString], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   
+  // Get puzzle name from name field or metadata, fallback to 'crossword'
+  const puzzleName = puzzle.name || puzzle.metadata?.name || 'crossword';
+  
   const link = document.createElement('a');
   link.href = url;
-  link.download = `${puzzle.name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.json`;
+  link.download = `${puzzleName.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.json`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

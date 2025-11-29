@@ -120,11 +120,68 @@ declare global {
   }
 }
 
+/**
+ * Check if File System Access API is supported
+ */
+export function isFileSystemAccessSupported(): boolean {
+  return 'showDirectoryPicker' in window;
+}
+
+/**
+ * Fallback: Download files as a ZIP (requires JSZip) or individual files
+ */
+async function downloadFilesAsFallback(
+  puzzleName: string,
+  files: PuzzleFiles,
+  imageBlob: Blob
+): Promise<void> {
+  // Create and download individual files
+  const downloadFile = (filename: string, content: string | Blob, mimeType: string = 'text/csv') => {
+    const blob = typeof content === 'string' ? new Blob([content], { type: mimeType }) : content;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${puzzleName}_${filename}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Download all files with a small delay between each to prevent browser blocking
+  const filesToDownload = [
+    { name: 'Empty_Character_Grid.csv', content: files.emptyGrid },
+    { name: 'Solution_Matrix.csv', content: files.solutionMatrix },
+    { name: 'Helper_Table_1_Horizontal_Start.csv', content: files.horizontalStartOffset },
+    { name: 'Helper_Table_2_Horizontal_End.csv', content: files.horizontalEndOffset },
+    { name: 'Helper_Table_3_Vertical_Start.csv', content: files.verticalStartOffset },
+    { name: 'Helper_Table_4_Vertical_End.csv', content: files.verticalEndOffset },
+  ];
+
+  for (const file of filesToDownload) {
+    downloadFile(file.name, file.content);
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  
+  // Download image
+  downloadFile('puzzle.png', imageBlob, 'image/png');
+}
+
+/**
+ * Save puzzle files using File System Access API or fallback
+ */
 export async function savePuzzleFiles(
   puzzleName: string,
   files: PuzzleFiles,
   imageBlob: Blob
 ): Promise<void> {
+  // Check for File System Access API support
+  if (!isFileSystemAccessSupported()) {
+    // Use fallback for unsupported browsers (Firefox, Safari)
+    await downloadFilesAsFallback(puzzleName, files, imageBlob);
+    return;
+  }
+
   try {
     // Request permission to show file picker
     const dirHandle = await window.showDirectoryPicker({
@@ -155,7 +212,10 @@ export async function savePuzzleFiles(
     await writeFile('puzzle.png', imageBlob);
 
   } catch (error) {
-    console.error('Error saving puzzle files:', error);
+    // Handle user cancellation gracefully
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('Save cancelled by user.');
+    }
     throw new Error('Failed to save puzzle files. Please try again.');
   }
 }

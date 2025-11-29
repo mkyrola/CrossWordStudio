@@ -1,16 +1,3 @@
-export interface GridCell {
-  letter: string;
-  isBlocked?: boolean;
-}
-
-export interface GridDimensions {
-  rows: number;
-  columns: number;
-  cellWidth: number;
-  cellHeight: number;
-}
-
-export interface GridOffset {
-  x: number;
-  y: number;
-}
+// Re-export all grid types from common location
+// This file exists for backward compatibility
+export type { GridCell, GridDimensions, GridOffset, WordHighlight, GridConfig } from '../common/types/grid';

@@ -4,12 +4,15 @@ import morgan from 'morgan';
 import { puzzleRoutes } from './routes/puzzles';
 
 const app = express();
-const port = 3000;
+const port = parseInt(process.env.PORT || '3000', 10);
+const isDev = process.env.NODE_ENV !== 'production';
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(morgan('dev')); // Logging
+if (isDev) {
+  app.use(morgan('dev')); // Logging only in development
+}
 
 // Routes
 app.use('/api/puzzles', puzzleRoutes);

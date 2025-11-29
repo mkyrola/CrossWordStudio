@@ -1,4 +1,5 @@
 import { PuzzleData } from '../types/puzzleData';
+import { GRID_CONFIG } from '../../config/constants';
 
 export function parseCSV(content: string): string[][] {
   return content
@@ -52,8 +53,8 @@ export async function loadPuzzleData(puzzleId: string): Promise<PuzzleData> {
     gridConfig: {
       rows: solution.length,
       columns: solution[0].length,
-      cellWidth: 40,
-      cellHeight: 40,
+      cellWidth: GRID_CONFIG.DEFAULT_CELL_SIZE,
+      cellHeight: GRID_CONFIG.DEFAULT_CELL_SIZE,
       offsetX: 0,
       offsetY: 0
     },

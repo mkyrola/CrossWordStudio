@@ -1,14 +1,15 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import theme from '../styles/theme';
 import GridCalibration, { GridCalibrationData } from '../components/GridCalibration';
 import { GridOverlay, CellState } from '../components/GridOverlay';
 import { SolutionImport } from '../components/SolutionImport';
 import Toolbar from '../components/Toolbar';
 import { detectGrid } from '../utils/gridDetection';
-import { exportToJson, printPuzzle } from '../utils/exportUtils';
+import { printPuzzle } from '../utils/exportUtils';
 import { GridCell } from '../types/grid';
 import SavePuzzleDialog from '../creator/components/SavePuzzleDialog';
 import { generatePuzzleFiles, savePuzzleFiles } from '../creator/utils/puzzleFileGenerator';
+import { useToast } from '../components/Toast';
 
 interface StudioProps {
   imageUrl: string | null;
@@ -36,21 +37,22 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  
+  const { showToast } = useToast();
 
   // Only navigate away if there's no image URL on mount
   useEffect(() => {
     if (!imageUrl) {
-      console.log('No image URL provided, returning to home');
       onNavigate();
     }
-  }, []); // Run only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally run only on mount - imageUrl and onNavigate are stable
 
   // Initialize audio with error handling
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = 0.3;
-      audioRef.current.onerror = (e) => {
-        console.error('Audio loading error:', e);
+      audioRef.current.onerror = () => {
         setIsPlaying(false);
       };
     }
@@ -104,8 +106,8 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
     }
   };
 
-  const handleImageError = (error: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.error('Failed to load image:', error);
+  const handleImageError = () => {
+    showToast('Failed to load image', 'error');
   };
 
   const handleCalibrationChange = (newCalibration: GridCalibrationData) => {
@@ -124,9 +126,9 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
     const result = await detectGrid(imageUrl);
     if (result.success && result.calibration) {
       setCalibrationData(result.calibration);
+      showToast('Grid detected successfully', 'success');
     } else {
-      console.error('Grid detection failed:', result.error);
-      // TODO: Show error message to user
+      showToast(result.error || 'Grid detection failed', 'error');
     }
   };
 
@@ -182,9 +184,8 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
           }
         }
       } catch (error) {
-        console.error('Error loading or playing audio:', error);
         setIsPlaying(false);
-        alert('Could not load or play the selected song. Please try again.');
+        showToast('Could not load or play the selected song', 'error');
       }
     }
   };
@@ -204,33 +205,38 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
           }
         }
       } catch (error) {
-        console.error('Error playing audio:', error);
         setIsPlaying(false);
-        alert('Could not play the audio. Please try again.');
+        showToast('Could not play the audio', 'error');
       }
     }
   };
 
   const handleSaveGrid = () => {
-    console.log('Save grid clicked');
-    
     if (!solution || !solution.length) {
-      console.log('No solution available');
-      alert('Please import a solution first');
+      showToast('Please import a solution first', 'warning');
       return;
     }
     
     if (!imageUrl) {
-      console.log('No image available');
-      alert('Please upload an image first');
+      showToast('Please upload an image first', 'warning');
       return;
     }
     
-    console.log('Opening save dialog');
     setIsSaveDialogOpen(true);
   };
 
   const handleSavePuzzle = async (puzzleName: string) => {
+    // Validate required data before attempting save
+    if (!solution || solution.length === 0) {
+      setSaveError('No solution data available to save');
+      return;
+    }
+    
+    if (!imageUrl) {
+      setSaveError('No image available to save');
+      return;
+    }
+
     try {
       // Generate all puzzle files
       const files = generatePuzzleFiles(solution);
@@ -255,7 +261,7 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
 
   const handlePrint = async () => {
     if (!imageUrl || !gridData.length) {
-      alert('Please create a grid first');
+      showToast('Please create a grid first', 'warning');
       return;
     }
     await printPuzzle(imageUrl, gridData);
@@ -279,7 +285,6 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
   };
 
   if (!imageUrl) {
-    console.log('No imageUrl provided, returning null');
     return null;
   }
 

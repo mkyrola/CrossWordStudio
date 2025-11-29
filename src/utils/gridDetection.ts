@@ -1,4 +1,5 @@
 import { GridCalibrationData } from '../components/GridCalibration';
+import { DETECTION_CONFIG } from '../config/constants';
 
 interface DetectionResult {
   success: boolean;
@@ -51,8 +52,8 @@ export async function detectGrid(imageUrl: string): Promise<DetectionResult> {
       calibration: {
         gridWidth: gridSize.width,
         gridHeight: gridSize.height,
-        cellWidth: 30, // Default cell width
-        cellHeight: 30, // Default cell height
+        cellWidth: DETECTION_CONFIG.DEFAULT_CELL_SIZE,
+        cellHeight: DETECTION_CONFIG.DEFAULT_CELL_SIZE,
         offsetX: offsets.x,
         offsetY: offsets.y
       }
@@ -96,7 +97,7 @@ function detectLines(edges: number[][], width: number, height: number) {
   // Simplified Hough transform implementation
   const horizontalLines: number[] = [];
   const verticalLines: number[] = [];
-  const threshold = 200; // Adjust based on testing
+  const threshold = DETECTION_CONFIG.EDGE_THRESHOLD;
 
   // Detect horizontal lines
   for (let y = 0; y < height; y++) {

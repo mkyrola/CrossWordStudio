@@ -37,8 +37,8 @@ export const PuzzleManager: React.FC<PuzzleManagerProps> = ({
         const endX = x + puzzle.tables.wordHelpers.horizontal.endOffset[y][x];
         return { startX, endX, startY: y, endY: y, isVertical: false };
       }
-    } catch (error) {
-      console.error('Error calculating word boundaries:', error);
+    } catch {
+      // Return null on boundary calculation errors - UI will gracefully degrade
       return null;
     }
   };

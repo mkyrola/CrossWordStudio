@@ -1,7 +1,17 @@
+import { IMAGE_CONFIG } from '../config/constants';
+
+/**
+ * Validates an uploaded image file for use as a crossword puzzle source
+ * @param file - The file to validate
+ * @returns Promise resolving to validation result
+ */
 export const validateImage = (file: File): Promise<{ isValid: boolean; error?: string }> => {
   return new Promise((resolve) => {
     // Check file type
-    if (!file.type.match(/^image\/(jpeg|png)$/)) {
+    const allowedTypes = IMAGE_CONFIG.ALLOWED_TYPES.join('|').replace(/image\//g, '');
+    const typeRegex = new RegExp(`^image/(${allowedTypes})$`);
+    
+    if (!typeRegex.test(file.type)) {
       resolve({ isValid: false, error: 'Please upload a JPG or PNG image.' });
       return;
     }
@@ -14,17 +24,15 @@ export const validateImage = (file: File): Promise<{ isValid: boolean; error?: s
       // Clean up
       URL.revokeObjectURL(objectUrl);
 
-      // Basic validation - we can enhance this later with actual puzzle detection
-      if (img.width < 200 || img.height < 200) {
+      // Validate minimum dimensions
+      if (img.width < IMAGE_CONFIG.MIN_WIDTH || img.height < IMAGE_CONFIG.MIN_HEIGHT) {
         resolve({ 
           isValid: false, 
-          error: 'Image is too small. Please upload a larger image.' 
+          error: `Image is too small. Minimum size is ${IMAGE_CONFIG.MIN_WIDTH}x${IMAGE_CONFIG.MIN_HEIGHT} pixels.` 
         });
         return;
       }
 
-      // TODO: Add more sophisticated puzzle detection here
-      // For now, we'll just validate the image dimensions
       resolve({ isValid: true });
     };
 

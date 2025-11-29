@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GridCell } from '../types/grid';
 import { createPuzzle, savePuzzle } from '../utils/puzzleUtils';
 import theme from '../styles/theme';
+import { useToast } from './Toast';
 
 interface PuzzleSaveProps {
   grid: GridCell[][];
@@ -11,10 +12,11 @@ interface PuzzleSaveProps {
 export const PuzzleSave: React.FC<PuzzleSaveProps> = ({ grid, onClose }) => {
   const [name, setName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const { showToast } = useToast();
 
   const handleSave = async () => {
     if (!name.trim()) {
-      alert('Please enter a puzzle name');
+      showToast('Please enter a puzzle name', 'warning');
       return;
     }
 
@@ -22,10 +24,10 @@ export const PuzzleSave: React.FC<PuzzleSaveProps> = ({ grid, onClose }) => {
       setIsSaving(true);
       const puzzle = createPuzzle(grid, name.trim());
       await savePuzzle(puzzle);
+      showToast('Puzzle saved successfully', 'success');
       onClose(); // Close the dialog after successful save
-    } catch (error) {
-      console.error('Error saving puzzle:', error);
-      alert('Failed to save puzzle. Please try again.');
+    } catch {
+      showToast('Failed to save puzzle. Please try again.', 'error');
     } finally {
       setIsSaving(false);
     }

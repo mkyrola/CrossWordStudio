@@ -9,13 +9,46 @@ interface SolverState {
   error: string | null;
 }
 
-const saveProgress = (puzzleId: string, grid: PuzzleData['tables']['emptyGrid']) => {
-  localStorage.setItem(`puzzle_${puzzleId}_progress`, JSON.stringify(grid));
+/**
+ * Safely save puzzle progress to localStorage
+ */
+const saveProgress = (puzzleId: string, grid: PuzzleData['tables']['emptyGrid']): void => {
+  try {
+    localStorage.setItem(`puzzle_${puzzleId}_progress`, JSON.stringify(grid));
+  } catch (error) {
+    // Handle quota exceeded or other storage errors gracefully
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('Failed to save puzzle progress:', error);
+    }
+  }
 };
 
+/**
+ * Safely load puzzle progress from localStorage
+ */
 const loadSavedProgress = (puzzleId: string): PuzzleData['tables']['emptyGrid'] | null => {
-  const saved = localStorage.getItem(`puzzle_${puzzleId}_progress`);
-  return saved ? JSON.parse(saved) : null;
+  try {
+    const saved = localStorage.getItem(`puzzle_${puzzleId}_progress`);
+    if (!saved) return null;
+    
+    const parsed = JSON.parse(saved);
+    // Basic validation that it's an array
+    if (!Array.isArray(parsed)) return null;
+    
+    return parsed;
+  } catch (error) {
+    // Handle JSON parse errors or corrupted data
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('Failed to load puzzle progress:', error);
+    }
+    // Clear corrupted data
+    try {
+      localStorage.removeItem(`puzzle_${puzzleId}_progress`);
+    } catch {
+      // Ignore removal errors
+    }
+    return null;
+  }
 };
 
 export const Solver: React.FC = () => {
