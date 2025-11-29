@@ -1,6 +1,7 @@
 import React, { useState, useEffect, KeyboardEvent } from 'react';
-import { GridCell, GridDimensions } from '../../common/types/grid';
+import { GridCell } from '../../common/types/grid';
 import { PuzzleWord } from '../../common/types/puzzle';
+import { GRID_CONFIG } from '../../config/constants';
 
 interface PuzzleGridProps {
   dimensions: {
@@ -11,7 +12,8 @@ interface PuzzleGridProps {
   onCellChange?: (row: number, col: number, value: string) => void;
 }
 
-export const PuzzleGrid: React.FC<PuzzleGridProps> = ({ dimensions, words, onCellChange }) => {
+export const PuzzleGrid: React.FC<PuzzleGridProps> = ({ dimensions, words: _words, onCellChange }) => {
+  // Note: _words reserved for future clue highlighting feature
   const [grid, setGrid] = useState<GridCell[][]>([]);
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
   const [direction, setDirection] = useState<'across' | 'down'>('across');
@@ -79,12 +81,14 @@ export const PuzzleGrid: React.FC<PuzzleGridProps> = ({ dimensions, words, onCel
     return null;
   };
 
+  const cellSize = GRID_CONFIG.DEFAULT_CELL_SIZE;
+  
   return (
     <div 
       className="puzzle-grid"
       style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(${dimensions.columns}, 40px)`,
+        gridTemplateColumns: `repeat(${dimensions.columns}, ${cellSize}px)`,
         gap: '2px',
         padding: '10px'
       }}
@@ -96,8 +100,8 @@ export const PuzzleGrid: React.FC<PuzzleGridProps> = ({ dimensions, words, onCel
             onClick={() => handleCellClick(rowIndex, colIndex)}
             onKeyDown={(e) => handleKeyPress(e, rowIndex, colIndex)}
             style={{
-              width: '40px',
-              height: '40px',
+              width: `${cellSize}px`,
+              height: `${cellSize}px`,
               border: '1px solid #ccc',
               backgroundColor: cell.isBlocked ? '#333' : '#fff',
               display: 'flex',

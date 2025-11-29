@@ -1,5 +1,3 @@
-import { GridCell } from '../../common/types/grid';
-
 export interface PuzzleData {
   // Basic puzzle info
   id: string;

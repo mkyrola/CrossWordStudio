@@ -125,27 +125,10 @@ function detectLines(edges: number[][], width: number, height: number) {
 }
 
 function analyzeLineSpacing(horizontalLines: number[], verticalLines: number[]) {
-  // Calculate average spacing
-  let avgHorizontalSpacing = 0;
-  let avgVerticalSpacing = 0;
-
-  if (horizontalLines.length > 1) {
-    for (let i = 1; i < horizontalLines.length; i++) {
-      avgHorizontalSpacing += horizontalLines[i] - horizontalLines[i - 1];
-    }
-    avgHorizontalSpacing /= (horizontalLines.length - 1);
-  }
-
-  if (verticalLines.length > 1) {
-    for (let i = 1; i < verticalLines.length; i++) {
-      avgVerticalSpacing += verticalLines[i] - verticalLines[i - 1];
-    }
-    avgVerticalSpacing /= (verticalLines.length - 1);
-  }
-
+  // Calculate grid dimensions from detected lines
   return {
-    width: Math.round(verticalLines.length - 1),
-    height: Math.round(horizontalLines.length - 1)
+    width: Math.max(0, verticalLines.length - 1),
+    height: Math.max(0, horizontalLines.length - 1)
   };
 }
 

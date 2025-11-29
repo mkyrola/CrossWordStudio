@@ -73,24 +73,6 @@ export function validatePuzzleData(data: any): ValidationError[] {
   return errors;
 }
 
-function validateGridDimensions(grid: any[][], expectedRows: number, expectedCols: number): boolean {
-  if (!Array.isArray(grid) || grid.length !== expectedRows) return false;
-  return grid.every(row => Array.isArray(row) && row.length === expectedCols);
-}
-
-function validateEmptyGridDimensions(grid: { value: string; isBlocked: boolean; }[][], expectedRows: number, expectedCols: number): boolean {
-  if (!Array.isArray(grid) || grid.length !== expectedRows) return false;
-  return grid.every(row => 
-    Array.isArray(row) && 
-    row.length === expectedCols &&
-    row.every(cell => 
-      typeof cell === 'object' &&
-      'value' in cell &&
-      'isBlocked' in cell
-    )
-  );
-}
-
 export function loadPuzzleFromJSON(jsonData: string): PuzzleData {
   try {
     const data = JSON.parse(jsonData) as PuzzleData;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import theme from '../styles/theme';
 import GridCalibration, { GridCalibrationData } from '../components/GridCalibration';
 import { GridOverlay, CellState } from '../components/GridOverlay';
@@ -27,13 +27,11 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
   });
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
   const [solution, setSolution] = useState<string[][]>();
-  const [imageBounds, setImageBounds] = useState({ left: 0, top: 0 });
   const [gridData, setGridData] = useState<GridCell[][]>([]);
   const imageRef = useRef<HTMLImageElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSong, setCurrentSong] = useState<'christmas' | 'jingle-bells' | 'jingle' | 'song1' | 'song2'>('christmas');
   const audioRef = useRef<HTMLAudioElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -91,8 +89,6 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
       if (containerRect) {
         const imageLeft = rect.left - containerRect.left;
         const imageTop = rect.top - containerRect.top;
-        
-        setImageBounds({ left: imageLeft, top: imageTop });
 
         // Only set initial cell sizes if they haven't been manually adjusted
         setCalibrationData(prev => ({
@@ -146,8 +142,6 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
         if (containerRect) {
           const imageLeft = rect.left - containerRect.left;
           const imageTop = rect.top - containerRect.top;
-          
-          setImageBounds({ left: imageLeft, top: imageTop });
           
           setCalibrationData(prev => ({
             ...prev,
@@ -264,7 +258,11 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
       showToast('Please create a grid first', 'warning');
       return;
     }
-    await printPuzzle(imageUrl, gridData);
+    try {
+      await printPuzzle(imageUrl, gridData);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Failed to print puzzle', 'error');
+    }
   };
 
   const toggleDarkMode = () => {

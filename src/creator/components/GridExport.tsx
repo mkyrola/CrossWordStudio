@@ -12,7 +12,7 @@ export const GridExport: React.FC<GridExportProps> = ({
   gridRef,
   grid,
   gridDimensions,
-  offset
+  offset: _offset // Reserved for future use with positioned exports
 }) => {
   const handleExport = () => {
     if (!gridRef.current) return;

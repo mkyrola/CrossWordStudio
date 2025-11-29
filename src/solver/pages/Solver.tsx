@@ -4,11 +4,6 @@ import { loadPuzzleData } from '../utils/csvConverter';
 import { PuzzleData } from '../types/puzzleData';
 import theme from '../../styles/theme';
 
-interface SolverState {
-  progress: number;
-  error: string | null;
-}
-
 /**
  * Safely save puzzle progress to localStorage
  */

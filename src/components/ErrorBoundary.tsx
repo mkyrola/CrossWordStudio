@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import theme from '../styles/theme';
 
 interface Props {
@@ -31,13 +31,14 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+  componentDidCatch(_error: Error, errorInfo: ErrorInfo): void {
     // Log the error to an error reporting service
+    // Note: _error is available for production error tracking services
     this.setState({ errorInfo });
     
     // In production, you would send this to an error tracking service
     if (process.env.NODE_ENV === 'production') {
-      // Example: sendToErrorTracking(error, errorInfo);
+      // Example: sendToErrorTracking(_error, errorInfo);
     }
   }
 
