@@ -19,7 +19,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUpload, onNavigate }) 
       if (result.isValid) {
         setError(null);
         onImageUpload(file);
-        onNavigate();
       } else {
         setError(result.error || 'Invalid image file');
       }
@@ -30,7 +29,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUpload, onNavigate }) 
         console.warn('Image validation error:', err);
       }
     }
-  }, [onImageUpload, onNavigate]);
+  }, [onImageUpload]);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();

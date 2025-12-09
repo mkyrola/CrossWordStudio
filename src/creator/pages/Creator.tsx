@@ -42,7 +42,7 @@ export const Creator: React.FC = () => {
         </h1>
         <ImageUpload 
           onImageUpload={handleImageUpload}
-          onNavigate={handleNavigate}
+          onNavigate={() => {}}
         />
       </div>
     );

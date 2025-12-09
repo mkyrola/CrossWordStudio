@@ -27,13 +27,12 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
   });
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
   const [solution, setSolution] = useState<string[][]>();
-  const [imageBounds, setImageBounds] = useState({ left: 0, top: 0 });
   const [gridData, setGridData] = useState<GridCell[][]>([]);
   const imageRef = useRef<HTMLImageElement>(null);
+  const [isDetecting, setIsDetecting] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSong, setCurrentSong] = useState<'christmas' | 'jingle-bells' | 'jingle' | 'song1' | 'song2'>('christmas');
   const audioRef = useRef<HTMLAudioElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -92,8 +91,6 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
         const imageLeft = rect.left - containerRect.left;
         const imageTop = rect.top - containerRect.top;
         
-        setImageBounds({ left: imageLeft, top: imageTop });
-
         // Only set initial cell sizes if they haven't been manually adjusted
         setCalibrationData(prev => ({
           ...prev,
@@ -111,24 +108,33 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
   };
 
   const handleCalibrationChange = (newCalibration: GridCalibrationData) => {
-    // Keep existing cell sizes unless explicitly changed
+    // Update calibration data with new values
     setCalibrationData(prev => ({
       ...prev,
       ...newCalibration,
-      cellWidth: newCalibration.cellWidth !== prev.cellWidth ? newCalibration.cellWidth : prev.cellWidth,
-      cellHeight: newCalibration.cellHeight !== prev.cellHeight ? newCalibration.cellHeight : prev.cellHeight
+      // Always update cell sizes from new calibration
+      cellWidth: newCalibration.cellWidth,
+      cellHeight: newCalibration.cellHeight
     }));
   };
 
   const handleAutoDetect = async () => {
-    if (!imageUrl) return;
-
-    const result = await detectGrid(imageUrl);
-    if (result.success && result.calibration) {
-      setCalibrationData(result.calibration);
-      showToast('Grid detected successfully', 'success');
-    } else {
-      showToast(result.error || 'Grid detection failed', 'error');
+    if (!imageUrl || isDetecting) return;
+    
+    setIsDetecting(true);
+    
+    try {
+      const result = await detectGrid(imageUrl, imageDimensions);
+      if (result.success && result.calibration) {
+        setCalibrationData(result.calibration);
+        showToast('Grid detected successfully', 'success');
+      } else {
+        showToast(result.error || 'Grid detection failed', 'error');
+      }
+    } catch (error) {
+      showToast('Grid detection failed', 'error');
+    } finally {
+      setIsDetecting(false);
     }
   };
 
@@ -146,8 +152,6 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
         if (containerRect) {
           const imageLeft = rect.left - containerRect.left;
           const imageTop = rect.top - containerRect.top;
-          
-          setImageBounds({ left: imageLeft, top: imageTop });
           
           setCalibrationData(prev => ({
             ...prev,
@@ -272,7 +276,7 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
     document.body.style.backgroundColor = isDarkMode ? '#F0F4F7' : '#1a1a1a';
   };
 
-  const handleGridChange = (newGrid: CellState[][]) => {
+  const handleGridChange = useCallback((newGrid: CellState[][]) => {
     // Convert CellState[][] to GridCell[][]
     const convertedGrid: GridCell[][] = newGrid.map(row =>
       row.map(cell => ({
@@ -282,7 +286,7 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
       }))
     );
     setGridData(convertedGrid);
-  };
+  }, []);
 
   if (!imageUrl) {
     return null;
@@ -383,9 +387,11 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
           flexWrap: 'wrap'
         }}>
           <GridCalibration
+            calibration={calibrationData}
             onCalibrationChange={handleCalibrationChange}
             onAutoDetect={handleAutoDetect}
             imageDimensions={imageDimensions}
+            isDetecting={isDetecting}
           />
           <SolutionImport
             gridWidth={calibrationData.gridWidth}

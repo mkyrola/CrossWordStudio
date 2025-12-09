@@ -11,37 +11,14 @@ export interface GridCalibrationData {
 }
 
 interface GridCalibrationProps {
+  calibration: GridCalibrationData;
   onCalibrationChange: (calibration: GridCalibrationData) => void;
   onAutoDetect: () => void;
   imageDimensions: { width: number; height: number };
+  isDetecting?: boolean;
 }
 
-const GridCalibration: React.FC<GridCalibrationProps> = ({ onCalibrationChange, onAutoDetect, imageDimensions }) => {
-  const [calibration, setCalibration] = useState<GridCalibrationData>({
-    gridWidth: 15,
-    gridHeight: 15,
-    cellWidth: Math.floor(imageDimensions.width / 15), // Initialize cell sizes based on image dimensions
-    cellHeight: Math.floor(imageDimensions.height / 15), // Initialize cell sizes based on image dimensions
-    offsetX: 0,
-    offsetY: 0
-  });
-
-  // Initialize calibration with proper cell sizes
-  useEffect(() => {
-    if (imageDimensions.width > 0 && imageDimensions.height > 0) {
-      // Calculate initial cell sizes only if they haven't been set
-      setCalibration(prev => {
-        const initialWidth = prev.cellWidth || Math.floor(imageDimensions.width / prev.gridWidth);
-        const initialHeight = prev.cellHeight || Math.floor(imageDimensions.height / prev.gridHeight);
-        
-        return {
-          ...prev,
-          cellWidth: initialWidth,
-          cellHeight: initialHeight
-        };
-      });
-    }
-  }, [imageDimensions.width, imageDimensions.height]);
+const GridCalibration: React.FC<GridCalibrationProps> = ({ calibration, onCalibrationChange, onAutoDetect, imageDimensions, isDetecting = false }) => {
 
   const handleChange = (key: keyof GridCalibrationData, value: string) => {
     const numValue = parseInt(value, 10);
@@ -79,7 +56,6 @@ const GridCalibration: React.FC<GridCalibrationProps> = ({ onCalibrationChange, 
           newCalibration[key] = Math.max(0, numValue);
       }
 
-      setCalibration(newCalibration);
       onCalibrationChange(newCalibration);
     }
   };
@@ -381,24 +357,28 @@ const GridCalibration: React.FC<GridCalibrationProps> = ({ onCalibrationChange, 
 
       <button
         onClick={onAutoDetect}
+        disabled={isDetecting}
         style={{
           width: '100%',
           padding: theme.spacing.md,
-          backgroundColor: theme.colors.primary,
+          backgroundColor: isDetecting ? theme.colors.text.secondary : theme.colors.primary,
           color: theme.colors.text.inverse,
           border: 'none',
           borderRadius: theme.borderRadius.small,
-          cursor: 'pointer',
+          cursor: isDetecting ? 'not-allowed' : 'pointer',
           fontSize: theme.typography.fontSize.medium,
           fontWeight: theme.typography.fontWeight.medium,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: theme.spacing.sm
+          gap: theme.spacing.sm,
+          opacity: isDetecting ? 0.7 : 1
         }}
       >
-        <span role="img" aria-label="detect">🔍</span>
-        Auto Detect Grid
+        <span role="img" aria-label="detect">
+          {isDetecting ? '⏳' : '🔍'}
+        </span>
+        {isDetecting ? 'Detecting...' : 'Auto Detect Grid'}
       </button>
     </div>
   );
