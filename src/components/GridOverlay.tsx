@@ -32,7 +32,6 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
   onGridChange
 }) => {
   const [grid, setGrid] = useState<CellState[][]>([]);
-  const [showSaveButton, setShowSaveButton] = useState(false);
 
   // Initialize or update grid when solution changes
   useEffect(() => {
@@ -48,7 +47,6 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
         }))
       );
       setGrid(newGrid);
-      setShowSaveButton(true);
     } else {
       // Initialize empty grid with correct dimensions
       setGrid(Array(gridHeight).fill(null).map(() =>
@@ -57,7 +55,6 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
           isEditable: true
         }))
       ));
-      setShowSaveButton(false);
     }
   }, [solution, gridWidth, gridHeight]);
 
@@ -83,11 +80,6 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
     if (onGridChange) {
       onGridChange(newGrid);
     }
-  };
-
-  const handleSaveGrid = () => {
-    // Grid save is handled by parent component via onGridChange callback
-    // This button is kept for visual consistency but save logic is delegated
   };
 
   return (
@@ -187,29 +179,6 @@ export const GridOverlay: React.FC<GridOverlayProps> = ({
           </g>
         )))}
       </svg>
-
-      {showSaveButton && (
-        <button
-          onClick={handleSaveGrid}
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            left: '20px',
-            padding: '12px 24px',
-            backgroundColor: theme.colors.accent,
-            color: theme.colors.text.inverse,
-            border: 'none',
-            borderRadius: '20px',
-            cursor: 'pointer',
-            fontSize: theme.typography.fontSize.medium,
-            fontWeight: 'bold',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-            zIndex: 4
-          }}
-        >
-          Save Grid
-        </button>
-      )}
     </>
   );
 };

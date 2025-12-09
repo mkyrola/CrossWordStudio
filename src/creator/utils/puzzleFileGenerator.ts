@@ -1,4 +1,5 @@
 import { GridCell } from '../../common/types/grid';
+import JSZip from 'jszip';
 
 interface PuzzleFiles {
   emptyGrid: string;
@@ -96,126 +97,44 @@ export function generatePuzzleFiles(grid: string[][]): PuzzleFiles {
   };
 }
 
-// Type definition for FileSystemDirectoryHandle from the File System Access API
-interface FileSystemDirectoryHandle {
-  getDirectoryHandle(name: string, options?: { create?: boolean }): Promise<FileSystemDirectoryHandle>;
-  getFileHandle(name: string, options?: { create?: boolean }): Promise<FileSystemFileHandle>;
-}
-
-interface FileSystemFileHandle {
-  createWritable(): Promise<FileSystemWritableFileStream>;
-}
-
-interface FileSystemWritableFileStream extends WritableStream {
-  write(data: string | Blob): Promise<void>;
-  close(): Promise<void>;
-}
-
-declare global {
-  interface Window {
-    showDirectoryPicker(options?: {
-      mode?: 'read' | 'readwrite';
-      startIn?: 'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos';
-    }): Promise<FileSystemDirectoryHandle>;
-  }
-}
-
 /**
- * Check if File System Access API is supported
- */
-export function isFileSystemAccessSupported(): boolean {
-  return 'showDirectoryPicker' in window;
-}
-
-/**
- * Fallback: Download files as a ZIP (requires JSZip) or individual files
- */
-async function downloadFilesAsFallback(
-  puzzleName: string,
-  files: PuzzleFiles,
-  imageBlob: Blob
-): Promise<void> {
-  // Create and download individual files
-  const downloadFile = (filename: string, content: string | Blob, mimeType: string = 'text/csv') => {
-    const blob = typeof content === 'string' ? new Blob([content], { type: mimeType }) : content;
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${puzzleName}_${filename}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  // Download all files with a small delay between each to prevent browser blocking
-  const filesToDownload = [
-    { name: 'Empty_Character_Grid.csv', content: files.emptyGrid },
-    { name: 'Solution_Matrix.csv', content: files.solutionMatrix },
-    { name: 'Helper_Table_1_Horizontal_Start.csv', content: files.horizontalStartOffset },
-    { name: 'Helper_Table_2_Horizontal_End.csv', content: files.horizontalEndOffset },
-    { name: 'Helper_Table_3_Vertical_Start.csv', content: files.verticalStartOffset },
-    { name: 'Helper_Table_4_Vertical_End.csv', content: files.verticalEndOffset },
-  ];
-
-  for (const file of filesToDownload) {
-    downloadFile(file.name, file.content);
-    await new Promise(resolve => setTimeout(resolve, 100));
-  }
-  
-  // Download image
-  downloadFile('puzzle.png', imageBlob, 'image/png');
-}
-
-/**
- * Save puzzle files using File System Access API or fallback
+ * Save puzzle files as a ZIP download
  */
 export async function savePuzzleFiles(
   puzzleName: string,
   files: PuzzleFiles,
   imageBlob: Blob
 ): Promise<void> {
-  // Check for File System Access API support
-  if (!isFileSystemAccessSupported()) {
-    // Use fallback for unsupported browsers (Firefox, Safari)
-    await downloadFilesAsFallback(puzzleName, files, imageBlob);
-    return;
+  const zip = new JSZip();
+  
+  // Create a folder for the puzzle
+  const folder = zip.folder(puzzleName);
+  
+  if (!folder) {
+    throw new Error('Failed to create ZIP folder');
   }
-
-  try {
-    // Request permission to show file picker
-    const dirHandle = await window.showDirectoryPicker({
-      mode: 'readwrite',
-      startIn: 'documents'
-    });
-
-    // Create puzzle directory
-    const puzzleDirHandle = await dirHandle.getDirectoryHandle(puzzleName, { create: true });
-
-    // Write a file helper
-    const writeFile = async (name: string, content: string | Blob) => {
-      const fileHandle = await puzzleDirHandle.getFileHandle(name, { create: true });
-      const writable = await fileHandle.createWritable();
-      await writable.write(content);
-      await writable.close();
-    };
-
-    // Write all CSV files
-    await writeFile('Empty_Character_Grid_with_Coordinates.csv', files.emptyGrid);
-    await writeFile('Solution_Matrix.csv', files.solutionMatrix);
-    await writeFile('Helper_Table_1__Horizontal_Start_Offset_.csv', files.horizontalStartOffset);
-    await writeFile('Helper_Table_2__Horizontal_End_Offset_.csv', files.horizontalEndOffset);
-    await writeFile('Helper_Table_3__Vertical_Start_Offset_.csv', files.verticalStartOffset);
-    await writeFile('Helper_Table_4__Vertical_End_Offset_.csv', files.verticalEndOffset);
-
-    // Write image file
-    await writeFile('puzzle.png', imageBlob);
-
-  } catch (error) {
-    // Handle user cancellation gracefully
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new Error('Save cancelled by user.');
-    }
-    throw new Error('Failed to save puzzle files. Please try again.');
-  }
+  
+  // Add all CSV files to the ZIP
+  folder.file('Empty_Character_Grid.csv', files.emptyGrid);
+  folder.file('Solution_Matrix.csv', files.solutionMatrix);
+  folder.file('Helper_Table_1_Horizontal_Start.csv', files.horizontalStartOffset);
+  folder.file('Helper_Table_2_Horizontal_End.csv', files.horizontalEndOffset);
+  folder.file('Helper_Table_3_Vertical_Start.csv', files.verticalStartOffset);
+  folder.file('Helper_Table_4_Vertical_End.csv', files.verticalEndOffset);
+  
+  // Add image to the ZIP
+  folder.file('puzzle.png', imageBlob);
+  
+  // Generate the ZIP file
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  
+  // Download the ZIP file
+  const url = URL.createObjectURL(zipBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${puzzleName}.zip`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }

@@ -216,25 +216,16 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
   };
 
   const handleSaveGrid = () => {
-    if (!solution || !solution.length) {
-      showToast('Please import a solution first', 'warning');
-      return;
-    }
-    
-    if (!imageUrl) {
-      showToast('Please upload an image first', 'warning');
-      return;
-    }
-    
+    // Allow saving even without solution - just save the grid configuration
+    console.log('Save grid button clicked, opening dialog');
     setIsSaveDialogOpen(true);
   };
 
   const handleSavePuzzle = async (puzzleName: string) => {
-    // Validate required data before attempting save
-    if (!solution || solution.length === 0) {
-      setSaveError('No solution data available to save');
-      return;
-    }
+    // Use empty solution if none provided
+    const solutionToSave = solution || Array(calibrationData.gridHeight).fill(null).map(() => 
+      Array(calibrationData.gridWidth).fill('')
+    );
     
     if (!imageUrl) {
       setSaveError('No image available to save');
@@ -243,7 +234,7 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
 
     try {
       // Generate all puzzle files
-      const files = generatePuzzleFiles(solution);
+      const files = generatePuzzleFiles(solutionToSave);
 
       // Get the image file from URL
       const imageResponse = await fetch(imageUrl);
@@ -256,8 +247,7 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
       setIsSaveDialogOpen(false);
       setSaveError(null);
       
-      // Navigate back to home
-      onNavigate();
+      showToast('Puzzle saved successfully', 'success');
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : 'Failed to save puzzle');
     }
@@ -384,15 +374,9 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
           borderTop: `1px solid ${theme.colors.border}`,
           display: 'flex',
           gap: '8px',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          minHeight: '48px'
         }}>
-          <GridCalibration
-            calibration={calibrationData}
-            onCalibrationChange={handleCalibrationChange}
-            onAutoDetect={handleAutoDetect}
-            imageDimensions={imageDimensions}
-            isDetecting={isDetecting}
-          />
           <SolutionImport
             gridWidth={calibrationData.gridWidth}
             gridHeight={calibrationData.gridHeight}
@@ -400,6 +384,15 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
           />
         </div>
       </div>
+
+      {/* Grid Calibration - Floating Panel */}
+      <GridCalibration
+        calibration={calibrationData}
+        onCalibrationChange={handleCalibrationChange}
+        onAutoDetect={handleAutoDetect}
+        imageDimensions={imageDimensions}
+        isDetecting={isDetecting}
+      />
 
       {/* Music Controls - Floating */}
       <div style={{
@@ -478,11 +471,90 @@ const Studio: React.FC<StudioProps> = ({ imageUrl, onNavigate }) => {
       </button>
 
       {/* Save Puzzle Dialog */}
-      <SavePuzzleDialog
-        isOpen={isSaveDialogOpen}
-        onClose={() => setIsSaveDialogOpen(false)}
-        onSave={handleSavePuzzle}
-      />
+      {isSaveDialogOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            padding: '32px',
+            borderRadius: '12px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+            width: '100%',
+            maxWidth: '400px'
+          }}>
+            <h2 style={{ margin: 0, marginBottom: '16px', color: '#333' }}>
+              Save Puzzle
+            </h2>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', color: '#666' }}>
+                Puzzle Name
+              </label>
+              <input
+                type="text"
+                id="puzzleNameInput"
+                placeholder="e.g., Christmas-2024"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #ccc',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+            
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setIsSaveDialogOpen(false)}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #ccc',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const input = document.getElementById('puzzleNameInput') as HTMLInputElement;
+                  const name = input?.value?.trim();
+                  if (name) {
+                    handleSavePuzzle(name);
+                  } else {
+                    showToast('Please enter a puzzle name', 'warning');
+                  }
+                }}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: '#4CAF50',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Error Message */}
       {saveError && (

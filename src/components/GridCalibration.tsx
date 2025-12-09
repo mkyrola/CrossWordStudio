@@ -18,7 +18,14 @@ interface GridCalibrationProps {
   isDetecting?: boolean;
 }
 
-const GridCalibration: React.FC<GridCalibrationProps> = ({ calibration, onCalibrationChange, onAutoDetect, imageDimensions, isDetecting = false }) => {
+const GridCalibration: React.FC<GridCalibrationProps> = ({ calibration = {
+  gridWidth: 15,
+  gridHeight: 15,
+  cellWidth: 40,
+  cellHeight: 40,
+  offsetX: 0,
+  offsetY: 0
+}, onCalibrationChange, onAutoDetect, imageDimensions, isDetecting = false }) => {
 
   const handleChange = (key: keyof GridCalibrationData, value: string) => {
     const numValue = parseInt(value, 10);
@@ -70,7 +77,7 @@ const GridCalibration: React.FC<GridCalibrationProps> = ({ calibration, onCalibr
       padding: window.innerWidth < 600 ? theme.spacing.md : theme.spacing.lg,
       borderRadius: theme.borderRadius.large,
       boxShadow: theme.shadows.large,
-      zIndex: 3,
+      zIndex: 100,
       display: 'flex',
       flexDirection: 'column',
       gap: theme.spacing.md,
